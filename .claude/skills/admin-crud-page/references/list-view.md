@@ -1,6 +1,7 @@
 # List View — Page & Table Patterns
 
 ## Table of Contents
+
 1. [Page Component Structure](#page-component-structure)
 2. [ListTable Component Structure](#listtable-component-structure)
 3. [Column Definition Pattern](#column-definition-pattern)
@@ -399,6 +400,7 @@ function toggleOne(id: string) {
 ```
 
 **Bulk delete Server Action:**
+
 ```typescript
 // actions.ts — add alongside single-delete:
 export async function bulkSoftDelete[Resource](ids: string[]): Promise<FormState> {
@@ -482,6 +484,7 @@ function EmptyState() {
 ## Breadcrumbs
 
 Always render above `<h1>`. Pattern shown in [Page Component Structure](#page-component-structure).
+
 - Use semantic `<nav aria-label="Breadcrumb">` → `<ol>` → `<li>`
 - Last item: `aria-current="page"`, not a link
 - Separator: `aria-hidden="true"`
@@ -550,11 +553,11 @@ Always render above `<h1>`. Pattern shown in [Page Component Structure](#page-co
 
 ## Keeping Current
 
-| Trigger | Section to Update |
-|---|---|
-| Shadcn Table or Select API change | Column Definition Pattern and Filter Patterns |
-| Next.js `useRouter`/`useSearchParams` API change | ListTable Component Structure |
-| Prisma `findMany`/`$transaction` API change | Page Component Structure |
-| Design system color change | All hardcoded hex values |
+| Trigger                                          | Section to Update                             |
+| ------------------------------------------------ | --------------------------------------------- |
+| Shadcn Table or Select API change                | Column Definition Pattern and Filter Patterns |
+| Next.js `useRouter`/`useSearchParams` API change | ListTable Component Structure                 |
+| Prisma `findMany`/`$transaction` API change      | Page Component Structure                      |
+| Design system color change                       | All hardcoded hex values                      |
 
 Last verified: 2026-05

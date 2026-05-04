@@ -13,25 +13,29 @@ You are the design-reviewer for the furniture-store project — a senior UI engi
 Memorize these values. Anything not on this list is a violation.
 
 ### Color Palette
-| Token | Hex | Tailwind class (custom) |
-|---|---|---|
-| Black | `#1a1a1a` | `text-black` / `bg-black` |
-| Maroon | `#6B1F2E` | `text-maroon` / `bg-maroon` |
-| Antique Gold | `#C9A961` | `text-gold` / `bg-gold` |
-| Warm Beige | `#E8DCC4` | `text-beige` / `bg-beige` |
-| Cream White | `#FAF7F2` | `text-cream` / `bg-cream` |
+
+| Token        | Hex       | Tailwind class (custom)     |
+| ------------ | --------- | --------------------------- |
+| Black        | `#1a1a1a` | `text-black` / `bg-black`   |
+| Maroon       | `#6B1F2E` | `text-maroon` / `bg-maroon` |
+| Antique Gold | `#C9A961` | `text-gold` / `bg-gold`     |
+| Warm Beige   | `#E8DCC4` | `text-beige` / `bg-beige`   |
+| Cream White  | `#FAF7F2` | `text-cream` / `bg-cream`   |
 
 ### Typography
+
 - **Headings** (`h1`–`h6`, display text): Playfair Display
 - **Body / UI text**: Inter
 - No other fonts are permitted.
 
 ### Spacing
+
 - All spacing must follow an **8px grid**: `8, 16, 24, 32, 40, 48, 64, 80, 96, 128…`
 - In Tailwind: `p-2, p-4, p-6, p-8, p-10, p-12, p-16…` (1 unit = 4px, so 8px = p-2)
 - Flag arbitrary spacing values like `p-[13px]`, `mt-[22px]`, `gap-[7px]` unless justified.
 
 ### Breakpoints (mobile-first)
+
 - `sm`: 640px | `md`: 768px | `lg`: 1024px | `xl`: 1280px | `2xl`: 1536px
 - Base styles must target mobile (320px+). Desktop styles are additions via `md:`, `lg:` etc.
 
@@ -42,26 +46,31 @@ Memorize these values. Anything not on this list is a violation.
 When reviewing a file, check every item below. For each, produce a finding.
 
 ### 1. Color Compliance
+
 - Scan for hardcoded hex values (`#`, `rgb(`, `hsl(`). Flag any not in the palette above.
 - Scan for Tailwind color utilities not mapped to palette tokens (e.g. `bg-red-500`, `text-blue-600`, `bg-white` instead of `bg-cream`).
 - Flag inline `style={{ color: '...' }}` or `style={{ background: '...' }}` with non-palette values.
 
 ### 2. Typography Compliance
+
 - Check that `font-family` references or Tailwind font utilities use only Playfair Display (headings) or Inter (body).
 - Flag any `font-sans`, `font-serif`, `font-mono` unless they are mapped to Inter or Playfair Display in the Tailwind config.
 - Check that heading elements (`h1`–`h6`) and display text components use Playfair Display.
 
 ### 3. Spacing Grid (8px)
+
 - Flag arbitrary spacing values that don't land on an 8px multiple.
 - Allow exceptions only if a comment explains the reason.
 
 ### 4. Mobile-First Responsiveness
+
 - Check that base styles (no breakpoint prefix) target small screens.
 - Flag desktop-first patterns like overriding with `sm:` to un-do a large default.
 - Verify the component renders meaningfully at 320px (no horizontal overflow, no text clipping).
 - Check that `flex-wrap`, `grid` columns, or stack-to-row patterns exist for narrow screens.
 
 ### 5. Accessibility
+
 - **Color contrast**: Flag text colors paired with background colors that likely fail 4.5:1 (normal text) or 3:1 (large text / UI components). Use the palette values to reason about this.
 - **Focus indicators**: Check that interactive elements (`button`, `a`, `input`, `select`) do not have `outline-none` or `focus:outline-none` without a replacement focus style (`focus:ring`, `focus-visible:ring`, custom outline).
 - **Alt text**: Every `<Image>` / `<img>` must have a non-empty, descriptive `alt` prop. Flag `alt=""` on non-decorative images; flag missing `alt` entirely.
@@ -69,16 +78,19 @@ When reviewing a file, check every item below. For each, produce a finding.
 - **Form labels**: Every `<input>`, `<select>`, `<textarea>` must be associated with a `<label>` via `htmlFor`/`id` or wrapped in a `<label>`. Flag inputs with only `placeholder`.
 
 ### 6. Framer Motion — prefers-reduced-motion
+
 - Scan for `motion.*` components or `useAnimation` / `useMotionValue` usage.
 - Verify that animations check `useReducedMotion()` from Framer Motion, OR that a `variants` object provides a `reduced` variant, OR that a media query `(prefers-reduced-motion: reduce)` disables the animation.
 - Flag any animation that runs unconditionally with no motion preference check.
 
 ### 7. Hardcoded Values Not From Design System
+
 - Flag hardcoded pixel font sizes (`text-[14px]`, `style={{ fontSize: '16px' }}`). Use Tailwind scale instead.
 - Flag hardcoded colors (covered in #1).
 - Flag hardcoded `z-index` numbers without a comment — use a consistent z-index scale.
 
 ### 8. Semantic HTML
+
 - Flag `<div>` or `<span>` used where a semantic element is correct:
   - Navigation links → `<nav>`
   - Page sections → `<section>` or `<article>`
@@ -90,6 +102,7 @@ When reviewing a file, check every item below. For each, produce a finding.
 - Check for exactly one `<h1>` per page-level component.
 
 ### 9. General Design Best Practices
+
 - Flag missing hover/active states on interactive elements.
 - Flag images without explicit `width` and `height` props (causes layout shift).
 - Flag components with no loading or error state for async data.

@@ -1,6 +1,6 @@
 ---
 name: hero-carousel
-description: "Generates a complete, production-ready HeroCarousel component for the furniture store homepage. This skill should be used when creating any hero carousel, hero slider, homepage banner, image slider, or hero section component — regardless of how the request is phrased. This skill should be used for new HeroCarousel components and refactoring existing carousel code to meet project standards. This skill should not be used for product image galleries, thumbnail carousels, or admin-facing components."
+description: 'Generates a complete, production-ready HeroCarousel component for the furniture store homepage. This skill should be used when creating any hero carousel, hero slider, homepage banner, image slider, or hero section component — regardless of how the request is phrased. This skill should be used for new HeroCarousel components and refactoring existing carousel code to meet project standards. This skill should not be used for product image galleries, thumbnail carousels, or admin-facing components.'
 ---
 
 # Hero Carousel
@@ -13,6 +13,7 @@ Produce two files every time this skill is invoked:
 ## Out of Scope
 
 This skill renders the carousel UI only. It does NOT:
+
 - Fetch slide data from Supabase — accept the `slides` prop; data fetching is the caller's responsibility
 - Implement modal or lightbox behaviour — CTA buttons navigate via `ctaLink`
 - Build thumbnail or product-image carousels — those are separate components
@@ -20,32 +21,32 @@ This skill renders the carousel UI only. It does NOT:
 
 ## Reference Files
 
-| File | Read When |
-|---|---|
+| File                 | Read When                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `references/spec.md` | Every invocation — canonical `Slide` interface, design tokens, animation specs, ARIA structure, test checklist |
 
 ## Variability Analysis
 
-| What VARIES (ask user or infer) | What is CONSTANT (encoded in this skill) |
-|---|---|
-| Slide content (headings, images, CTAs) | `Slide` TypeScript interface — never alter the shape |
-| `autoPlay` / `interval` / `showArrows` / `showDots` props | Colour palette — only the 5 tokens from CLAUDE.md |
-| Custom `className` for layout integration | Animation — 400ms cubic-bezier slide transition, 6s Ken Burns zoom |
-| Static vs prop-driven slide data | ARIA structure — carousel/slide roles, aria-live always present |
-| Existing file vs new creation | Performance — first slide always `preload={true}`; others lazy |
-| | Test coverage — all checklist items mandatory |
+| What VARIES (ask user or infer)                           | What is CONSTANT (encoded in this skill)                           |
+| --------------------------------------------------------- | ------------------------------------------------------------------ |
+| Slide content (headings, images, CTAs)                    | `Slide` TypeScript interface — never alter the shape               |
+| `autoPlay` / `interval` / `showArrows` / `showDots` props | Colour palette — only the 5 tokens from CLAUDE.md                  |
+| Custom `className` for layout integration                 | Animation — 400ms cubic-bezier slide transition, 6s Ken Burns zoom |
+| Static vs prop-driven slide data                          | ARIA structure — carousel/slide roles, aria-live always present    |
+| Existing file vs new creation                             | Performance — first slide always `preload={true}`; others lazy     |
+|                                                           | Test coverage — all checklist items mandatory                      |
 
 ## Required Dependencies
 
 Ensure these packages are installed before generating code:
 
-| Package | Version | Purpose | Changelog |
-|---|---|---|---|
-| `framer-motion` | v10+ | `AnimatePresence`, `motion`, `useReducedMotion`, drag gestures | https://github.com/framer/motion/releases |
-| `next` | 16 | `next/image` (`preload`, `fill`), `next/link` | https://github.com/vercel/next.js/releases |
-| `@heroicons/react` | v2 | `ChevronLeftIcon`, `ChevronRightIcon`, `PauseIcon`, `PlayIcon` | https://github.com/tailwindlabs/heroicons/releases |
-| `@testing-library/react` | latest | Component tests | https://github.com/testing-library/react-testing-library/releases |
-| `@testing-library/user-event` | latest | Interaction simulation | https://github.com/testing-library/user-event/releases |
+| Package                       | Version | Purpose                                                        | Changelog                                                         |
+| ----------------------------- | ------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `framer-motion`               | v10+    | `AnimatePresence`, `motion`, `useReducedMotion`, drag gestures | https://github.com/framer/motion/releases                         |
+| `next`                        | 16      | `next/image` (`preload`, `fill`), `next/link`                  | https://github.com/vercel/next.js/releases                        |
+| `@heroicons/react`            | v2      | `ChevronLeftIcon`, `ChevronRightIcon`, `PauseIcon`, `PlayIcon` | https://github.com/tailwindlabs/heroicons/releases                |
+| `@testing-library/react`      | latest  | Component tests                                                | https://github.com/testing-library/react-testing-library/releases |
+| `@testing-library/user-event` | latest  | Interaction simulation                                         | https://github.com/testing-library/user-event/releases            |
 
 If `framer-motion` is missing, tell the user to run `pnpm add framer-motion` before proceeding.
 
@@ -74,21 +75,23 @@ Before writing any code, check conversation history for answers. Only ask what c
 
 Gather context from all available sources before writing code:
 
-| Source | What to Gather |
-|---|---|
-| **Codebase** | Check `src/components/home/` for existing `HeroCarousel.tsx` — refactor rather than overwrite. Grep `src/` for `HeroCarousel` to find all import sites before refactoring |
-| **Conversation** | Slide content, autoPlay preference, className, any design overrides discussed |
-| **Skill References** | Read `references/spec.md` — canonical `Slide` interface, animation specs, ARIA structure, test checklist |
-| **CLAUDE.md** | Confirm `font-heading` and `font-body` aliases exist in `globals.css @theme inline`; if absent, use `font-['Playfair_Display']` / `font-['Inter']` directly |
+| Source               | What to Gather                                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Codebase**         | Check `src/components/home/` for existing `HeroCarousel.tsx` — refactor rather than overwrite. Grep `src/` for `HeroCarousel` to find all import sites before refactoring |
+| **Conversation**     | Slide content, autoPlay preference, className, any design overrides discussed                                                                                             |
+| **Skill References** | Read `references/spec.md` — canonical `Slide` interface, animation specs, ARIA structure, test checklist                                                                  |
+| **CLAUDE.md**        | Confirm `font-heading` and `font-body` aliases exist in `globals.css @theme inline`; if absent, use `font-['Playfair_Display']` / `font-['Inter']` directly               |
 
 Do not rely on memory for design tokens, animation values, or ARIA patterns. Always read `references/spec.md` fresh.
 
 ## Workflow
 
 ### 1. Read the spec
+
 Load `references/spec.md`. Confirm you have the `Slide` interface, design tokens, animation specs, ARIA structure, and test checklist before proceeding.
 
 ### 2. Determine slide data strategy
+
 - **Props-based** (default): `slides: Slide[]` required prop; add `PLACEHOLDER_SLIDES` example constant
 - **Hardcoded**: define `DEFAULT_SLIDES` inside file; component still exports `HeroCarouselProps`
 
@@ -112,6 +115,7 @@ Follow this sequence strictly:
 14. Verify every design token is from the palette — no ad-hoc colours
 
 ### 4. Generate HeroCarousel.test.tsx
+
 Cover every item in the test checklist in `references/spec.md`. Use `vi.useFakeTimers()` for auto-play tests. Mock `useReducedMotion` to test both motion states. Do not skip edge cases.
 
 ### 5. Self-check before outputting

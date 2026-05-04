@@ -2,7 +2,7 @@
 
 This folder contains **per-feature specification files** for the furniture-store project.
 
-A spec is written and agreed upon *before* implementation begins. It defines what a feature
+A spec is written and agreed upon _before_ implementation begins. It defines what a feature
 does, how it should look and behave, what APIs it calls, what edge cases exist, and what
 the acceptance criteria are. This prevents scope creep and makes plan-mode faster because
 Claude can read the spec instead of asking clarifying questions.
@@ -31,27 +31,35 @@ Examples:
 # Feature: <Name>
 
 ## Overview
+
 One-paragraph summary of what this feature does and why.
 
 ## User Stories
+
 - As a [user], I want to [action] so that [benefit].
 
 ## UI / Behaviour
+
 Describe screens, states (loading, empty, error, success), and interactions.
 
 ## Data Model
+
 List relevant DB tables, fields, and relationships.
 
 ## API / Server Actions
+
 List endpoints or Server Actions, their inputs, outputs, and auth requirements.
 
 ## Edge Cases
+
 List known edge cases and how they should be handled.
 
 ## Acceptance Criteria
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 
 ## Out of Scope
+
 What this feature explicitly does NOT include.
 ```
