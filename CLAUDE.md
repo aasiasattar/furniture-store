@@ -1,7 +1,9 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+
 <!-- END:nextjs-agent-rules -->
 
 ---
@@ -25,37 +27,40 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 2. TECH STACK
 
-| Layer | Technology |
-|---|---|
+| Layer              | Technology                           |
+| ------------------ | ------------------------------------ |
 | Frontend & Backend | Next.js 16 (App Router) + TypeScript |
-| Styling | Tailwind CSS + Shadcn/ui |
-| Animations | Framer Motion |
-| Database | Supabase (PostgreSQL) + Prisma ORM |
-| Auth | NextAuth.js |
-| Image hosting | Cloudinary |
-| Email | Resend |
-| AI Chatbot | Claude API |
-| Hosting | Vercel |
-| Package manager | pnpm |
+| Styling            | Tailwind CSS + Shadcn/ui             |
+| Animations         | Framer Motion                        |
+| Database           | Supabase (PostgreSQL) + Prisma ORM   |
+| Auth               | NextAuth.js                          |
+| Image hosting      | Cloudinary                           |
+| Email              | Resend                               |
+| AI Chatbot         | Claude API                           |
+| Hosting            | Vercel                               |
+| Package manager    | pnpm                                 |
 
 ---
 
 ## 3. DESIGN SYSTEM
 
 ### Colors
-| Name | Hex |
-|---|---|
-| Black | `#1a1a1a` |
-| Maroon | `#6B1F2E` |
+
+| Name         | Hex       |
+| ------------ | --------- |
+| Black        | `#1a1a1a` |
+| Maroon       | `#6B1F2E` |
 | Antique Gold | `#C9A961` |
-| Warm Beige | `#E8DCC4` |
-| Cream White | `#FAF7F2` |
+| Warm Beige   | `#E8DCC4` |
+| Cream White  | `#FAF7F2` |
 
 ### Typography
+
 - **Headings:** Playfair Display
 - **Body:** Inter
 
 ### Style
+
 - Premium, luxurious, warm
 - No harsh whites or cold greys — always use cream/beige tones
 
@@ -70,15 +75,17 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Absolute imports with `@/` prefix (e.g. `@/components/ui/Button`)
 
 ### Naming conventions
-| Thing | Convention |
-|---|---|
-| Components | `PascalCase` |
-| Utilities / helpers | `camelCase` |
-| Custom hooks | `use` prefix (e.g. `useCart`) |
-| Constants | `UPPER_SNAKE_CASE` |
-| Types / Interfaces | `PascalCase` |
+
+| Thing               | Convention                    |
+| ------------------- | ----------------------------- |
+| Components          | `PascalCase`                  |
+| Utilities / helpers | `camelCase`                   |
+| Custom hooks        | `use` prefix (e.g. `useCart`) |
+| Constants           | `UPPER_SNAKE_CASE`            |
+| Types / Interfaces  | `PascalCase`                  |
 
 ### File rules
+
 - One component per file
 - Max file length: 300 lines — split into sub-components if exceeded
 - All components must meet WCAG 2.1 AA accessibility standards
@@ -157,11 +164,13 @@ tests/               # E2E and integration tests
 ## 9. PERFORMANCE STANDARDS
 
 ### Targets
+
 - Lighthouse: 90+ on all 4 categories (Performance, Accessibility, Best Practices, SEO)
 - Core Web Vitals: LCP < 2.5s, FID < 100ms, CLS < 0.1
 - Page JS bundles: < 200KB per page
 
 ### Rules
+
 - Use `next/image` for ALL images — never a raw `<img>` tag
 - Use `next/font` for fonts — no Google Fonts CDN link
 - Lazy load all below-the-fold content
@@ -209,19 +218,22 @@ tests/               # E2E and integration tests
 ## 12. TESTING STANDARDS
 
 ### Tools
-| Type | Tool |
-|---|---|
-| Unit tests | Vitest |
+
+| Type            | Tool                  |
+| --------------- | --------------------- |
+| Unit tests      | Vitest                |
 | Component tests | React Testing Library |
-| E2E tests | Playwright |
+| E2E tests       | Playwright            |
 
 ### Critical flows requiring E2E coverage
+
 1. Customer signup → login
 2. Browse → Add to cart → Checkout (mock)
 3. Admin login → Add product → Edit → Delete
 4. Search → Filter → Sort
 
 ### Rules
+
 - Test files co-located: `Component.test.tsx` next to `Component.tsx`
 - Coverage target: 70%+ for all business logic (cart, pricing, auth, search)
 - Every test covers: happy path + edge cases + error cases
@@ -248,6 +260,7 @@ tests/               # E2E and integration tests
 ## 14. GIT WORKFLOW
 
 ### Branch naming
+
 ```
 feature/   — new functionality
 fix/       — bug fixes
@@ -258,6 +271,7 @@ chore/     — build, deps, tooling
 ```
 
 ### Commit message format
+
 ```
 type(scope): short description
 
@@ -269,6 +283,7 @@ refactor(product): extract ProductGallery into sub-component
 ```
 
 ### Rules
+
 - Never commit directly to `main` — always use a PR, even solo
 - Atomic commits — one logical change per commit
 - Commit often, push frequently
@@ -322,6 +337,7 @@ refactor(product): extract ProductGallery into sub-component
 ## 18. DEPLOYMENT REQUIREMENTS
 
 ### Pre-deploy checklist
+
 - [ ] All tests passing (`pnpm test`)
 - [ ] No TypeScript errors (`pnpm tsc --noEmit`)
 - [ ] No ESLint errors (`pnpm lint`)
@@ -333,6 +349,7 @@ refactor(product): extract ProductGallery into sub-component
 - [ ] No `console.log` left in production code paths
 
 ### Infrastructure
+
 - Deploy on Vercel via GitHub integration (auto-deploy on push to `main`)
 - Staging via Vercel preview deployments (auto-created for every PR)
 - Encrypted env vars in Vercel Environment Variables — never in code
@@ -352,13 +369,16 @@ refactor(product): extract ProductGallery into sub-component
 - **Google Analytics 4** — user behaviour
 
 ### Key events to track
+
 - `signup` — new user registered
 - `add_to_cart` — product added to cart
 - `checkout_complete` — order placed
 - `search` — search query submitted
 
 ### Alerts
+
 Set up alerts for:
+
 - Error rate spike (> 1% of requests)
 - Performance degradation (LCP > 3s)
 - Downtime (any 5xx for > 2 min)

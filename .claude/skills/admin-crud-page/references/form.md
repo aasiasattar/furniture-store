@@ -1,6 +1,7 @@
 # Form & Delete Dialog Patterns
 
 ## Table of Contents
+
 1. [Form Component Structure](#form-component-structure)
 2. [React Hook Form Setup](#react-hook-form-setup)
 3. [Controlled Field Pattern](#controlled-field-pattern)
@@ -135,10 +136,15 @@ const { register, handleSubmit, formState: { errors }, reset, setValue, watch } 
 ## Controlled Field Pattern
 
 ```tsx
-{/* String field */}
+{
+  /* String field */
+}
 <div className="space-y-1">
   <label htmlFor="name" className="text-sm font-medium text-stone-700">
-    Name <span aria-hidden="true" className="text-red-500">*</span>
+    Name{' '}
+    <span aria-hidden="true" className="text-red-500">
+      *
+    </span>
   </label>
   <input
     id="name"
@@ -149,27 +155,35 @@ const { register, handleSubmit, formState: { errors }, reset, setValue, watch } 
     data-testid="[resource]-name-input"
   />
   <FieldError error={errors.name} />
-</div>
+</div>;
 
-{/* Number field */}
+{
+  /* Number field */
+}
 <div className="space-y-1">
-  <label htmlFor="price" className="text-sm font-medium text-stone-700">Price (PKR)</label>
+  <label htmlFor="price" className="text-sm font-medium text-stone-700">
+    Price (PKR)
+  </label>
   <input
     id="price"
     type="number"
     step="1"
     min="0"
-    {...register('price', { valueAsNumber: true })}   // ← valueAsNumber for Int/Float fields
+    {...register('price', { valueAsNumber: true })} // ← valueAsNumber for Int/Float fields
     disabled={isPending}
     className="w-full border rounded px-3 py-2 text-sm disabled:opacity-50"
     data-testid="[resource]-price-input"
   />
   <FieldError error={errors.price} />
-</div>
+</div>;
 
-{/* Select / enum field */}
+{
+  /* Select / enum field */
+}
 <div className="space-y-1">
-  <label htmlFor="status" className="text-sm font-medium text-stone-700">Status</label>
+  <label htmlFor="status" className="text-sm font-medium text-stone-700">
+    Status
+  </label>
   <select
     id="status"
     {...register('status')}
@@ -182,9 +196,11 @@ const { register, handleSubmit, formState: { errors }, reset, setValue, watch } 
     <option value="ARCHIVED">Archived</option>
   </select>
   <FieldError error={errors.status} />
-</div>
+</div>;
 
-{/* Boolean field */}
+{
+  /* Boolean field */
+}
 <div className="flex items-center gap-2">
   <input
     id="isOnSale"
@@ -193,8 +209,10 @@ const { register, handleSubmit, formState: { errors }, reset, setValue, watch } 
     disabled={isPending}
     data-testid="[resource]-isOnSale-checkbox"
   />
-  <label htmlFor="isOnSale" className="text-sm text-stone-700">On Sale</label>
-</div>
+  <label htmlFor="isOnSale" className="text-sm text-stone-700">
+    On Sale
+  </label>
+</div>;
 ```
 
 ---
@@ -203,7 +221,7 @@ const { register, handleSubmit, formState: { errors }, reset, setValue, watch } 
 
 ```typescript
 // ✅ Correct — React 19 API
-import { useActionState } from 'react'
+import { useActionState } from 'react';
 
 // ❌ Wrong — deprecated in React 19 / removed from react-dom
 // import { useFormState } from 'react-dom'
@@ -214,17 +232,19 @@ import { useActionState } from 'react'
 // - dispatchAction: the function to call — pass it the form data
 // - isPending: true while the Server Action is executing
 
-const [state, formAction, isPending] = useActionState(
-  create[Resource],
-  { success: false, errors: undefined, message: undefined },
-)
+const [state, formAction, isPending] = useActionState(create[Resource], {
+  success: false,
+  errors: undefined,
+  message: undefined,
+});
 ```
 
 **Wire to RHF submit handler:**
+
 ```typescript
 const onSubmit = form.handleSubmit((data) => {
-  formAction(data)   // ← pass validated form data to the Server Action
-})
+  formAction(data); // ← pass validated form data to the Server Action
+});
 ```
 
 ---
@@ -239,13 +259,16 @@ const onSubmit = form.handleSubmit((data) => {
 ```
 
 **Error priority:**
+
 1. Client-side RHF/Zod errors (`errors.fieldName`) — shown immediately, no server round-trip
 2. Server-side field errors (`state.errors?.fieldName`) — shown after submission if server catches something the client didn't
 3. Global server message (`state.message`) — shown for auth failures or unexpected errors
 
 ```tsx
 // Show server-side field errors if client-side passed but server failed
-<FieldError error={errors.name ?? (state.errors?.name ? { message: state.errors.name[0] } : undefined)} />
+<FieldError
+  error={errors.name ?? (state.errors?.name ? { message: state.errors.name[0] } : undefined)}
+/>
 ```
 
 ---
@@ -294,12 +317,12 @@ import { CldUploadWidget } from 'next-cloudinary'
 ```tsx
 // Reusable helper — put near the top of the form file or in ui/
 function FieldError({ error }: { error?: { message?: string } }) {
-  if (!error?.message) return null
+  if (!error?.message) return null;
   return (
     <p role="alert" className="text-red-500 text-xs mt-0.5">
       {error.message}
     </p>
-  )
+  );
 }
 ```
 
@@ -308,6 +331,7 @@ function FieldError({ error }: { error?: { message?: string } }) {
 ## Disabled State During Submission
 
 All interactive elements must be disabled while `isPending` is true:
+
 - All `<input>`, `<select>`, `<textarea>` — add `disabled={isPending}`
 - Submit button — shows "Saving…" text and `disabled={isPending}`
 - Cancel button — may stay enabled (lets user abort) but visually indicate loading
@@ -320,7 +344,9 @@ All interactive elements must be disabled while `isPending` is true:
       <span className="sr-only">Saving, please wait</span>
       <span aria-hidden="true">Saving…</span>
     </>
-  ) : 'Save Changes'}
+  ) : (
+    'Save Changes'
+  )}
 </button>
 ```
 
@@ -332,10 +358,10 @@ All interactive elements must be disabled while `isPending` is true:
 // Redirect inside useEffect, not synchronously — avoids React state update during render
 useEffect(() => {
   if (state.success) {
-    toast.success(mode === 'create' ? '[Resource] created!' : '[Resource] updated!')
-    router.push('/admin/[resources]')
+    toast.success(mode === 'create' ? '[Resource] created!' : '[Resource] updated!');
+    router.push('/admin/[resources]');
   }
-}, [state.success])   // ← dependency on state.success, not state itself
+}, [state.success]); // ← dependency on state.success, not state itself
 ```
 
 ---
@@ -343,17 +369,23 @@ useEffect(() => {
 ## Cancel and Reset Buttons
 
 ```tsx
-{/* Cancel — go back, no changes */}
+{
+  /* Cancel — go back, no changes */
+}
 <button type="button" onClick={() => router.back()} data-testid="[resource]-cancel">
   Cancel
-</button>
+</button>;
 
-{/* Reset — clear form to defaults (only in create mode; edit mode should Cancel) */}
-{mode === 'create' && (
-  <button type="button" onClick={() => reset()} data-testid="[resource]-reset">
-    Reset
-  </button>
-)}
+{
+  /* Reset — clear form to defaults (only in create mode; edit mode should Cancel) */
+}
+{
+  mode === 'create' && (
+    <button type="button" onClick={() => reset()} data-testid="[resource]-reset">
+      Reset
+    </button>
+  );
+}
 ```
 
 ---
@@ -455,6 +487,7 @@ export function [Resource]DeleteDialog({ id, name, cascadeWarning }: [Resource]D
 ```
 
 **Focus management checklist:**
+
 - [ ] Trigger button stored in `triggerRef`
 - [ ] `onOpenChange` calls `triggerRef.current?.focus()` when dialog closes
 - [ ] `handleDelete` also calls `triggerRef.current?.focus()` after close
@@ -466,7 +499,7 @@ export function [Resource]DeleteDialog({ id, name, cascadeWarning }: [Resource]D
 
 ```typescript
 // sonner toast with action button — 5-second window
-import { toast } from 'sonner'
+import { toast } from 'sonner';
 
 // After successful soft delete:
 toast(`"${name}" deleted`, {
@@ -474,15 +507,16 @@ toast(`"${name}" deleted`, {
   action: {
     label: 'Undo',
     onClick: async () => {
-      const result = await restore[Resource](id)
-      if (result.success) toast.success(`"${name}" restored`)
-      else toast.error('Restore failed')
+      const result = await restore[Resource](id);
+      if (result.success) toast.success(`"${name}" restored`);
+      else toast.error('Restore failed');
     },
   },
-})
+});
 ```
 
 **Rules:**
+
 - Soft delete does NOT redirect — caller shows undo toast first
 - Hard delete disables undo — do NOT use `prisma.[resource].delete()`
 - Toast duration must be exactly 5000ms — not configurable per resource
@@ -491,12 +525,12 @@ toast(`"${name}" deleted`, {
 
 ## Keeping Current
 
-| Trigger | Section to Update |
-|---|---|
-| React 19 `useActionState` signature change | `useActionState Hook` section |
-| Shadcn Dialog API change | `Delete Dialog Structure` |
-| sonner API change | `Undo Toast Pattern` |
-| `@hookform/resolvers` zodResolver API change | `React Hook Form Setup` |
-| next-cloudinary API change | `Cloudinary Upload Widget` |
+| Trigger                                      | Section to Update             |
+| -------------------------------------------- | ----------------------------- |
+| React 19 `useActionState` signature change   | `useActionState Hook` section |
+| Shadcn Dialog API change                     | `Delete Dialog Structure`     |
+| sonner API change                            | `Undo Toast Pattern`          |
+| `@hookform/resolvers` zodResolver API change | `React Hook Form Setup`       |
+| next-cloudinary API change                   | `Cloudinary Upload Widget`    |
 
 Last verified: 2026-05

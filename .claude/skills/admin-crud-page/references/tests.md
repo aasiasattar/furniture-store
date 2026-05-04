@@ -1,6 +1,7 @@
 # Test Coverage Checklists
 
 ## Table of Contents
+
 1. [Test Setup & Conventions](#test-setup--conventions)
 2. [List Table Tests](#list-table-tests)
 3. [Form Tests](#form-tests)
@@ -29,8 +30,9 @@
 ```
 
 **Standard mock block for actions tests:**
+
 ```typescript
-import { vi } from 'vitest'
+import { vi } from 'vitest';
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -41,29 +43,30 @@ vi.mock('@/lib/prisma', () => ({
       count: vi.fn(),
     },
   },
-}))
+}));
 
 vi.mock('next/headers', () => ({
   cookies: vi.fn().mockResolvedValue({ get: vi.fn() }),
-}))
+}));
 
 vi.mock('@/lib/auth', () => ({
   getSession: vi.fn().mockResolvedValue({ user: { id: 'user-123' } }),
-}))
+}));
 
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
-vi.mock('next/navigation', () => ({ redirect: vi.fn() }))
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
+vi.mock('next/navigation', () => ({ redirect: vi.fn() }));
 ```
 
 **Standard mock block for component tests:**
+
 ```typescript
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/admin/[resources]',
-}))
+}));
 
-vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 ```
 
 ---
@@ -73,6 +76,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 **File:** `src/components/admin/[Resource]ListTable.test.tsx`
 
 ### Render
+
 - [ ] Renders table with correct `data-testid="[resource]-table"` attribute
 - [ ] Renders a row for each item in the `items` prop
 - [ ] Renders column headers matching `COLUMNS` array
@@ -80,16 +84,19 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 - [ ] Renders `[Resource]DeleteDialog` trigger per row
 
 ### Search
+
 - [ ] Search input renders with `data-testid="[resource]-search-input"`
 - [ ] Typing updates `q` in URL after 300ms debounce (use `vi.useFakeTimers`)
 - [ ] Clearing search removes `q` from URL
 
 ### Sort
+
 - [ ] Clicking a sortable column header updates `sort` and `dir` in URL
 - [ ] Clicking the same header again toggles `dir` between `asc` and `desc`
 - [ ] Active sort header shows directional indicator (↑ / ↓)
 
 ### Pagination
+
 - [ ] Renders correct total page count from `total` / `pageSize`
 - [ ] Current page button has `aria-current="page"`
 - [ ] Previous button is disabled on page 1
@@ -98,6 +105,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 - [ ] Changing page size updates `pageSize` in URL
 
 ### Bulk Actions
+
 - [ ] Select-all checkbox selects all visible rows
 - [ ] Deselecting one row unchecks the select-all
 - [ ] Bulk delete button appears only when selection > 0
@@ -105,10 +113,12 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 - [ ] Clicking bulk delete calls `bulkSoftDelete[Resource]` with all selected IDs
 
 ### Empty State
+
 - [ ] Renders `data-testid="[resource]-empty-state"` when `items` is empty
 - [ ] Empty state contains an "Add [Resource]" CTA link
 
 ### Skeleton / Pending
+
 - [ ] While `isPending` is true (useTransition), renders `TableSkeleton` instead of table
 - [ ] `aria-busy="true"` on skeleton container
 
@@ -119,38 +129,46 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 **File:** `src/components/admin/[Resource]Form.test.tsx`
 
 ### Render — Create Mode
+
 - [ ] Renders heading "New [Resource]"
 - [ ] All required fields render with associated `<label>` (`htmlFor` matches `id`)
 - [ ] Submit button text is "Create [Resource]"
 - [ ] Form has `data-testid="[resource]-form"`
 
 ### Render — Edit Mode
+
 - [ ] Renders heading "Edit [Resource]"
 - [ ] Fields pre-populated with values from the `[resource]` prop
 - [ ] Submit button text is "Save Changes"
 
 ### Client-Side Validation
+
 - [ ] Submitting with empty required fields shows inline error messages
 - [ ] Error messages appear adjacent to their respective field (not just a global banner)
 - [ ] Error messages are accessible via `role="alert"`
 
 ### Submit — Success
+
 - [ ] Submitting valid data calls the correct Server Action (create vs update)
 - [ ] Shows success toast on `state.success = true`
 - [ ] Calls `router.push('/admin/[resources]')` after success
 
 ### Submit — Server Error
+
 - [ ] Global server message renders when `state.message` is set and `state.success = false`
 - [ ] Server field errors are displayed beside the relevant fields
 
 ### Disabled State
+
 - [ ] All inputs are disabled while `isPending` is true
 - [ ] Submit button shows "Saving…" text while `isPending` is true
 
 ### Cancel
+
 - [ ] Clicking Cancel calls `router.back()`
 
 ### Reset (create mode only)
+
 - [ ] Clicking Reset clears all fields back to empty defaults
 
 ---
@@ -160,6 +178,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 **File:** `src/components/admin/[Resource]DeleteDialog.test.tsx`
 
 ### Open / Close
+
 - [ ] Dialog is closed by default
 - [ ] Clicking the trigger button opens the dialog
 - [ ] Dialog has `data-testid="[resource]-delete-dialog"`
@@ -167,14 +186,17 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 - [ ] Dialog description mentions 5-second undo window
 
 ### Cascade Warning
+
 - [ ] When `cascadeWarning` prop is provided, warning text is visible in the dialog
 - [ ] When `cascadeWarning` is not provided, no warning element is rendered
 
 ### Cancel
+
 - [ ] Clicking Cancel button closes the dialog
 - [ ] Focus returns to the trigger button after cancel
 
 ### Confirm Delete
+
 - [ ] Clicking Delete button calls `softDelete[Resource]` with the correct `id`
 - [ ] Delete button shows "Deleting…" text while `isPending`
 - [ ] On success: dialog closes
@@ -183,6 +205,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 - [ ] On error: error toast fires with `result.message`
 
 ### Undo Toast
+
 - [ ] Clicking Undo in the toast calls `restore[Resource]` with the correct `id`
 - [ ] Successful restore shows a success toast
 - [ ] Failed restore shows an error toast
@@ -194,6 +217,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 **File:** `src/app/admin/[resources]/actions.test.ts`
 
 ### `create[Resource]`
+
 - [ ] Returns `{ success: false, message: 'Unauthorized' }` when no session
 - [ ] Returns `{ success: false, errors: {...} }` when Zod validation fails
 - [ ] Calls `prisma.[resource].create` with validated data + `createdBy` + `updatedBy`
@@ -201,6 +225,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 - [ ] Calls `redirect('/admin/[resources]')` on success
 
 ### `update[Resource]`
+
 - [ ] Returns `{ success: false, message: 'Unauthorized' }` when no session
 - [ ] Returns `{ success: false, errors: {...} }` when Zod validation fails
 - [ ] Calls `prisma.[resource].update` with `where: { id, deletedAt: null }`
@@ -209,6 +234,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 - [ ] Calls `revalidatePath` and `redirect` on success
 
 ### `softDelete[Resource]`
+
 - [ ] Returns `{ success: false, message: 'Unauthorized' }` when no session
 - [ ] Calls `prisma.[resource].update` with `data: { deletedAt: new Date() }` — NOT `.delete()`
 - [ ] Includes `updatedBy` in the update data
@@ -216,11 +242,13 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 - [ ] Returns `{ success: true }` on success
 
 ### `restore[Resource]`
+
 - [ ] Returns `{ success: false, message: 'Unauthorized' }` when no session
 - [ ] Calls `prisma.[resource].update` with `data: { deletedAt: null }`
 - [ ] Returns `{ success: true }` on success
 
 ### `bulkSoftDelete[Resource]` (if implemented)
+
 - [ ] Calls `prisma.[resource].updateMany` with `id: { in: ids }`
 - [ ] All records in the batch get `deletedAt: new Date()` and `updatedBy`
 
@@ -279,11 +307,11 @@ describe('[Resource]Schema', () => {
 
 ## Keeping Current
 
-| Trigger | Section to Update |
-|---|---|
-| Vitest major version bump | Test Setup & Conventions — re-verify `vi.mock` syntax |
-| React Testing Library major version bump | All component test sections |
-| sonner API change | Delete Dialog Tests — undo toast assertions |
-| Prisma mock pattern change | Server Actions Tests — mock block |
+| Trigger                                  | Section to Update                                     |
+| ---------------------------------------- | ----------------------------------------------------- |
+| Vitest major version bump                | Test Setup & Conventions — re-verify `vi.mock` syntax |
+| React Testing Library major version bump | All component test sections                           |
+| sonner API change                        | Delete Dialog Tests — undo toast assertions           |
+| Prisma mock pattern change               | Server Actions Tests — mock block                     |
 
 Last verified: 2026-05

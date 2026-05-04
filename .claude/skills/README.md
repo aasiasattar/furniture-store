@@ -26,6 +26,7 @@ Examples:
 ## File structure
 
 Each skill file should include:
+
 - **Purpose** — what the skill does
 - **Trigger** — the slash command name (e.g. `/scaffold-page`)
 - **Steps** — the ordered list of actions Claude will take

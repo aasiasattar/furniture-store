@@ -7,10 +7,12 @@ Deep evaluation guidance for each criterion.
 ## 1. Structure & Anatomy
 
 ### 1.1 SKILL.md Exists
+
 - **Score 3**: Present at root of skill directory
 - **Score 0**: Missing = automatic fail
 
 ### 1.2 Line Count
+
 - **Score 3**: <300 lines (lean and focused)
 - **Score 2**: 300-500 lines (acceptable)
 - **Score 1**: 500-800 lines (bloated, needs refactoring)
@@ -21,10 +23,11 @@ Deep evaluation guidance for each criterion.
 ### 1.3 Frontmatter Quality
 
 **Score 3** - Complete, triggerable, proper format:
+
 ```yaml
 ---
-name: skill-name  # lowercase, hyphens, ≤64 chars, matches directory
-description: |    # ≤1024 chars, third-person style
+name: skill-name # lowercase, hyphens, ≤64 chars, matches directory
+description: | # ≤1024 chars, third-person style
   This skill creates X and validates Y.
   This skill should be used when users need to build widgets,
   generate reports, or process data.
@@ -32,14 +35,16 @@ description: |    # ≤1024 chars, third-person style
 ```
 
 **Score 2** - Present but format issues:
+
 ```yaml
 ---
 name: skill-name
-description: Creates X. Use when doing Y.  # Not third-person
+description: Creates X. Use when doing Y. # Not third-person
 ---
 ```
 
 **Score 1** - Minimal:
+
 ```yaml
 ---
 name: skill-name
@@ -52,6 +57,7 @@ description: X skill
 ### 1.4 Name Constraints
 
 **Score 3**: All constraints met
+
 - Lowercase letters only
 - Numbers allowed
 - Hyphens for separation
@@ -67,6 +73,7 @@ description: X skill
 ### 1.5 Description Format
 
 **Score 3** - [What] + [When] + Third-person:
+
 ```yaml
 description: |
   Validates skills against production criteria.
@@ -75,6 +82,7 @@ description: |
 ```
 
 **Score 2** - Has content but wrong style:
+
 ```yaml
 description: |
   Validate skills against criteria.
@@ -82,6 +90,7 @@ description: |
 ```
 
 **Score 1** - Vague:
+
 ```yaml
 description: Helps with skill stuff
 ```
@@ -91,6 +100,7 @@ description: Helps with skill stuff
 ### 1.6 No Extraneous Files
 
 **Should NOT exist in skill directory**:
+
 - README.md (SKILL.md IS the readme)
 - CHANGELOG.md (version in frontmatter if needed)
 - LICENSE (inherited from repo)
@@ -102,18 +112,22 @@ description: Helps with skill stuff
 ### 1.7 Progressive Disclosure
 
 **Score 3**:
+
 - SKILL.md has overview + quick reference
 - Complex patterns in `references/`
 - Table of reference files with "when to read"
 
 **Score 2**:
+
 - Some content in references
 - SKILL.md still has most detail
 
 **Score 1**:
+
 - References exist but poorly organized
 
 **Score 0**:
+
 - Everything in SKILL.md or no references
 
 ---
@@ -123,22 +137,27 @@ description: Helps with skill stuff
 ### 2.1 Conciseness
 
 **Score 3** - Every sentence earns its place:
+
 ```markdown
 ## Quick Start
+
 1. Define input schema
 2. Implement handler
 3. Register tool
 ```
 
 **Score 1** - Verbose:
+
 ```markdown
 ## Quick Start
+
 In this section, we will walk through the steps needed to get started with creating your tool. First, you will need to define an input schema. This schema specifies what parameters your tool accepts...
 ```
 
 ### 2.2 Imperative Form
 
 **Score 3**:
+
 ```markdown
 - Validate all inputs with Zod
 - Return structured responses
@@ -146,6 +165,7 @@ In this section, we will walk through the steps needed to get started with creat
 ```
 
 **Score 1**:
+
 ```markdown
 - You should validate all inputs with Zod
 - It would be good to return structured responses
@@ -155,12 +175,15 @@ In this section, we will walk through the steps needed to get started with creat
 ### 2.3 Appropriate Freedom
 
 **Score 3** - Constraints where needed, flexibility elsewhere:
+
 ```markdown
 ## Required (No Exceptions)
+
 - Use TypeScript strict mode
 - Validate inputs at boundaries
 
 ## Flexible (Your Choice)
+
 - Error message format
 - Logging verbosity
 ```
@@ -170,13 +193,16 @@ In this section, we will walk through the steps needed to get started with creat
 ### 2.4 Scope Clarity
 
 **Score 3**:
+
 ```markdown
 ## What This Skill Does
+
 - Creates X
 - Validates Y
 - Generates Z
 
 ## What This Skill Does NOT Do
+
 - Production deployment
 - Performance optimization
 - Security auditing
@@ -187,9 +213,12 @@ In this section, we will walk through the steps needed to get started with creat
 ### 2.5 Output Specification
 
 **Score 3**:
+
 ```markdown
 ## Output Format
+
 Every generated [artifact] includes:
+
 - [ ] Component A with X property
 - [ ] Component B following Y pattern
 - [ ] Component C validated against Z
@@ -204,13 +233,17 @@ Every generated [artifact] includes:
 ### 3.1 Clarification Triggers
 
 **Score 3** - Structured clarification section:
+
 ```markdown
 ## Required Clarifications
+
 Before proceeding, ask:
+
 1. **Data shape**: "What structure will the input have?"
 2. **Action type**: "Read-only or write?"
 
 ## Optional Clarifications
+
 3. **Styling**: "Any design preferences?" (if relevant)
 ```
 
@@ -228,8 +261,10 @@ Before proceeding, ask:
 ### 3.3 Context Awareness
 
 **Score 3**:
+
 ```markdown
 Before asking:
+
 - Check conversation history for prior answers
 - Infer from file names/content when possible
 - Only ask what cannot be determined
@@ -244,11 +279,12 @@ Before asking:
 ### 4.1 Source URLs
 
 **Score 3** - Table with official sources:
+
 ```markdown
-| Resource | URL | Use For |
-|----------|-----|---------|
-| Official Guide | https://... | Core patterns |
-| API Reference | https://... | Method details |
+| Resource       | URL         | Use For        |
+| -------------- | ----------- | -------------- |
+| Official Guide | https://... | Core patterns  |
+| API Reference  | https://... | Method details |
 ```
 
 **Score 2**: URLs mentioned but scattered
@@ -260,8 +296,10 @@ Before asking:
 ### 4.2 Fetch Guidance
 
 **Score 3**:
+
 ```markdown
 For patterns not covered here, fetch from official docs:
+
 - Complex widget: https://...
 - Advanced auth: https://...
 ```
@@ -271,11 +309,14 @@ For patterns not covered here, fetch from official docs:
 ### 4.3 Example Coverage
 
 **Score 3**:
+
 ```markdown
 ### Good Example
+
 [working code]
 
 ### Bad Example (Don't Do This)
+
 [antipattern with explanation why]
 ```
 
@@ -288,13 +329,16 @@ For patterns not covered here, fetch from official docs:
 ### 5.1 Best Practices Enforcement
 
 **Score 3** - Mandatory checklist:
+
 ```markdown
 ### Must Follow
+
 - [ ] WCAG AA contrast (4.5:1)
 - [ ] Keyboard navigation
 - [ ] Error states
 
 ### Must Avoid
+
 - Nested scrolling
 - Hardcoded strings
 ```
@@ -304,9 +348,12 @@ For patterns not covered here, fetch from official docs:
 ### 5.2 Quality Gates
 
 **Score 3** - Output checklist before delivery:
+
 ```markdown
 ## Output Checklist
+
 Before delivering, verify:
+
 - [ ] All required components present
 - [ ] Follows naming convention
 - [ ] No hardcoded values
@@ -322,8 +369,10 @@ Before delivering, verify:
 ### 6.1 Error Handling
 
 **Score 3**:
+
 ```markdown
 ## Error Handling
+
 - Invalid input: Return validation error with specifics
 - Network failure: Retry with backoff, then graceful fallback
 - Unknown error: Log context, return safe default
@@ -334,8 +383,10 @@ Before delivering, verify:
 ### 6.2 Security Considerations
 
 **Score 3** (when relevant):
+
 ```markdown
 ## Security
+
 - Never hardcode secrets
 - Validate/sanitize all user input
 - Use parameterized queries
@@ -347,8 +398,10 @@ Before delivering, verify:
 ### 6.3 Dependencies
 
 **Score 3**:
+
 ```markdown
 ## Dependencies
+
 - Requires: Node.js 18+, TypeScript 5+
 - Optional: Redis for caching
 - External APIs: None / List with rate limits
@@ -363,6 +416,7 @@ Before delivering, verify:
 ### 7.1 Modularity
 
 **Score 3** - Self-contained reference files:
+
 ```
 references/
 ├── core-patterns.md      # Can be read independently
@@ -375,8 +429,10 @@ references/
 ### 7.2 Update Path
 
 **Score 3**:
+
 ```markdown
 ## Keeping Current
+
 - Fetch latest from [URL] for new patterns
 - Check [changelog URL] for breaking changes
 - Last verified: 2024-12
@@ -387,6 +443,7 @@ references/
 ### 7.3 Clear Organization
 
 **Score 3** - Logical flow:
+
 1. What (overview)
 2. When (triggers)
 3. How (workflow)
@@ -404,17 +461,18 @@ Skills should enable single-interaction implementation with embedded expertise.
 ### 8.1 Before Implementation Section
 
 **Score 3** - Complete context gathering:
+
 ```markdown
 ## Before Implementation
 
 Gather context to ensure successful implementation:
 
-| Source | Gather |
-|--------|--------|
-| **Codebase** | Existing structure, patterns, conventions |
-| **Conversation** | User's specific requirements |
-| **Skill References** | Domain patterns from `references/` |
-| **User Guidelines** | Project-specific conventions |
+| Source               | Gather                                    |
+| -------------------- | ----------------------------------------- |
+| **Codebase**         | Existing structure, patterns, conventions |
+| **Conversation**     | User's specific requirements              |
+| **Skill References** | Domain patterns from `references/`        |
+| **User Guidelines**  | Project-specific conventions              |
 
 Ensure all required context is gathered before implementing.
 ```
@@ -428,6 +486,7 @@ Ensure all required context is gathered before implementing.
 ### 8.2 Embedded Expertise
 
 **Score 3** - Domain knowledge IN the skill:
+
 - Best practices documented in `references/`
 - Code examples included
 - Anti-patterns listed
@@ -440,6 +499,7 @@ Ensure all required context is gathered before implementing.
 **Score 0**: No embedded domain expertise
 
 **Red flags**:
+
 - "Research the domain..."
 - "Fetch documentation for..."
 - "Discover best practices..."
@@ -449,12 +509,13 @@ These indicate runtime discovery instead of embedded expertise.
 ### 8.3 User-Only Questions
 
 **Score 3** - Only asks about USER's context:
+
 ```markdown
-| Ask | Don't Ask |
-|-----|-----------|
-| "What's YOUR use case?" | "What is [technology]?" |
-| "What's YOUR tech stack?" | "What options exist?" |
-| "Specific constraints?" | "What are best practices?" |
+| Ask                       | Don't Ask                  |
+| ------------------------- | -------------------------- |
+| "What's YOUR use case?"   | "What is [technology]?"    |
+| "What's YOUR tech stack?" | "What options exist?"      |
+| "Specific constraints?"   | "What are best practices?" |
 ```
 
 **Score 2**: Mostly user questions, some domain questions
@@ -472,8 +533,10 @@ Skills should handle variations, not single requirements.
 ### 9.1 Handles Variations
 
 **Score 3** - Explicitly adaptable:
+
 ```markdown
 This skill adapts to:
+
 - Different data shapes
 - Multiple output formats
 - Various libraries/frameworks
@@ -488,13 +551,16 @@ This skill adapts to:
 ### 9.2 Variable vs Constant Analysis
 
 **Score 3** - Clear separation:
+
 ```markdown
 ## What VARIES (ask user)
+
 - Data shape/structure
 - Tool/library preference
 - Output format
 
 ## What's CONSTANT (encoded in skill)
+
 - Best practices
 - Error handling patterns
 - Security requirements
@@ -509,28 +575,33 @@ This skill adapts to:
 ### 9.3 Not Requirement-Specific
 
 **Score 3** - Generic within domain:
+
 ```markdown
 # Good: "Create visualizations"
+
 Adapts to chart type, library, data shape
 
 # Good: "Deploy applications"
+
 Adapts to platform, orchestration, environment
 ```
 
 **Score 0** - Too specific:
+
 ```markdown
 # Bad: "Create bar chart with sales data using Recharts"
+
 # Bad: "Deploy to AWS EKS with Helm"
 ```
 
 ### 9.4 Abstraction Level
 
-| Level | Description | Score |
-|-------|-------------|-------|
-| Domain-agnostic | Works across domains | 3 |
-| Domain-specific, tool-agnostic | Within domain, any tool | 3 |
-| Tool-specific, workflow-agnostic | Specific tool, flexible workflow | 2 |
-| Requirement-specific | Single use case | 0 |
+| Level                            | Description                      | Score |
+| -------------------------------- | -------------------------------- | ----- |
+| Domain-agnostic                  | Works across domains             | 3     |
+| Domain-specific, tool-agnostic   | Within domain, any tool          | 3     |
+| Tool-specific, workflow-agnostic | Specific tool, flexible workflow | 2     |
+| Requirement-specific             | Single use case                  | 0     |
 
 ---
 
@@ -539,6 +610,7 @@ Adapts to platform, orchestration, environment
 ### 10.1 Builder Skills
 
 Must have ALL of:
+
 - [ ] Required Clarifications section
 - [ ] Output Specification
 - [ ] Domain Standards (Must Follow / Must Avoid)
@@ -552,6 +624,7 @@ Must have ALL of:
 ### 10.2 Guide Skills
 
 Must have ALL of:
+
 - [ ] Workflow Steps (numbered, sequential)
 - [ ] Good/Bad Examples
 - [ ] Official Documentation links
@@ -564,6 +637,7 @@ Must have ALL of:
 ### 10.3 Automation Skills
 
 Must have ALL of:
+
 - [ ] Scripts in `scripts/` directory
 - [ ] Dependencies documented
 - [ ] Error Handling guidance
@@ -577,6 +651,7 @@ Must have ALL of:
 ### 10.4 Analyzer Skills
 
 Must have ALL of:
+
 - [ ] Analysis Scope (what to analyze, what to ignore)
 - [ ] Evaluation Criteria
 - [ ] Output Format specification
@@ -590,6 +665,7 @@ Must have ALL of:
 ### 10.5 Validator Skills
 
 Must have ALL of:
+
 - [ ] Quality Criteria with weights
 - [ ] Scoring Rubric (0-3 or similar)
 - [ ] Pass/Fail Thresholds

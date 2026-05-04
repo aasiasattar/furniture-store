@@ -42,11 +42,11 @@ A single feature often needs **all three**. Write them all when relevant.
 
 ## Step 3: File Placement Rules
 
-| Test type | Location | Naming |
-|---|---|---|
+| Test type           | Location                   | Naming                                   |
+| ------------------- | -------------------------- | ---------------------------------------- |
 | Unit (utility/hook) | Same folder as source file | `formatPrice.test.ts`, `useCart.test.ts` |
-| Component | Same folder as component | `ProductCard.test.tsx` |
-| E2E | `tests/e2e/` | `checkout.spec.ts`, `auth.spec.ts` |
+| Component           | Same folder as component   | `ProductCard.test.tsx`                   |
+| E2E                 | `tests/e2e/`               | `checkout.spec.ts`, `auth.spec.ts`       |
 
 Never put tests in a separate top-level `__tests__` folder. Co-locate unit and component tests.
 
@@ -83,6 +83,7 @@ describe('functionUnderTest', () => {
 ```
 
 ### Rules
+
 - Use `describe` blocks to group related tests.
 - Test names follow: `should <behaviour> when <condition>`.
 - Always cover: **happy path + edge cases + error cases**. No exceptions.
@@ -91,6 +92,7 @@ describe('functionUnderTest', () => {
 - Use `beforeEach`/`afterEach` to reset state — never let tests share mutable state.
 
 ### Mocking Custom Hooks in Unit Tests
+
 ```typescript
 vi.mock('@/hooks/useCart', () => ({
   useCart: vi.fn(() => ({
@@ -99,7 +101,7 @@ vi.mock('@/hooks/useCart', () => ({
     removeItem: vi.fn(),
     total: 0,
   })),
-}))
+}));
 ```
 
 ---
@@ -150,6 +152,7 @@ describe('ProductCard', () => {
 ```
 
 ### Query Priority (use in this order)
+
 1. `getByRole` — preferred, most accessible
 2. `getByLabelText` — for form inputs
 3. `getByPlaceholderText` — fallback for inputs
@@ -157,6 +160,7 @@ describe('ProductCard', () => {
 5. `getByTestId` — last resort; requires `data-testid` on the element
 
 ### Rules
+
 - Use `userEvent` (not `fireEvent`) for all user interactions — it simulates real browser behaviour.
 - Wrap async assertions in `waitFor` or use `findBy*` queries.
 - Always test: **rendered output + user interactions + loading state + error state + empty state**.
@@ -165,7 +169,9 @@ describe('ProductCard', () => {
 - Use `data-testid` sparingly — only when no semantic query works.
 
 ### Required `data-testid` Attributes for E2E
+
 When writing component tests, ensure these `data-testid` attributes exist on elements that Playwright will target:
+
 ```
 data-testid="product-card"
 data-testid="add-to-cart-btn"
@@ -177,6 +183,7 @@ data-testid="filter-panel"
 data-testid="auth-form"
 data-testid="admin-product-form"
 ```
+
 If the component is missing a required `data-testid`, add it to your test file as a note and flag it to the developer.
 
 ---
@@ -186,22 +193,23 @@ If the component is missing a required `data-testid`, add it to your test file a
 ### Setup Template
 
 ```typescript
-import { test, expect } from '@playwright/test'
+import { test, expect } from '@playwright/test';
 
 test.describe('Feature: <name>', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000')
-  })
+    await page.goto('http://localhost:3000');
+  });
 
   test('<user story>', async ({ page }) => {
     // Arrange — set up preconditions
     // Act — perform actions
     // Assert — verify outcome
-  })
-})
+  });
+});
 ```
 
 ### Selector Priority
+
 1. `page.getByRole()` — preferred
 2. `page.getByLabel()` — for form inputs
 3. `page.getByText()` — for visible text
@@ -210,132 +218,143 @@ test.describe('Feature: <name>', () => {
 ### The 4 Critical E2E Flows (ALL must have tests)
 
 #### Flow 1: Customer Signup → Login
+
 ```typescript
 test.describe('Auth: Signup and Login', () => {
   test('new customer can sign up', async ({ page }) => {
-    await page.goto('/auth/signup')
-    await page.getByLabel('Full Name').fill('Test User')
-    await page.getByLabel('Email').fill(`test+${Date.now()}@example.com`)
-    await page.getByLabel('Password').fill('SecurePass123!')
-    await page.getByRole('button', { name: /sign up/i }).click()
-    await expect(page).toHaveURL('/') // redirect to home after signup
-    await expect(page.getByTestId('user-avatar')).toBeVisible()
-  })
+    await page.goto('/auth/signup');
+    await page.getByLabel('Full Name').fill('Test User');
+    await page.getByLabel('Email').fill(`test+${Date.now()}@example.com`);
+    await page.getByLabel('Password').fill('SecurePass123!');
+    await page.getByRole('button', { name: /sign up/i }).click();
+    await expect(page).toHaveURL('/'); // redirect to home after signup
+    await expect(page.getByTestId('user-avatar')).toBeVisible();
+  });
 
   test('existing customer can log in', async ({ page }) => {
-    await page.goto('/auth/login')
-    await page.getByLabel('Email').fill('existing@example.com')
-    await page.getByLabel('Password').fill('SecurePass123!')
-    await page.getByRole('button', { name: /log in/i }).click()
-    await expect(page).toHaveURL('/')
-    await expect(page.getByTestId('user-avatar')).toBeVisible()
-  })
+    await page.goto('/auth/login');
+    await page.getByLabel('Email').fill('existing@example.com');
+    await page.getByLabel('Password').fill('SecurePass123!');
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page).toHaveURL('/');
+    await expect(page.getByTestId('user-avatar')).toBeVisible();
+  });
 
   test('shows error on invalid credentials', async ({ page }) => {
-    await page.goto('/auth/login')
-    await page.getByLabel('Email').fill('wrong@example.com')
-    await page.getByLabel('Password').fill('wrongpassword')
-    await page.getByRole('button', { name: /log in/i }).click()
-    await expect(page.getByRole('alert')).toContainText(/invalid/i)
-  })
-})
+    await page.goto('/auth/login');
+    await page.getByLabel('Email').fill('wrong@example.com');
+    await page.getByLabel('Password').fill('wrongpassword');
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('alert')).toContainText(/invalid/i);
+  });
+});
 ```
 
 #### Flow 2: Browse → Add to Cart → Checkout
+
 ```typescript
 test.describe('Shopping: Browse to Checkout', () => {
   test('customer can add a product to cart and proceed to checkout', async ({ page }) => {
     // Browse
-    await page.goto('/products')
-    await page.locator('[data-testid="product-card"]').first().click()
-    await expect(page).toHaveURL(/\/products\//)
+    await page.goto('/products');
+    await page.locator('[data-testid="product-card"]').first().click();
+    await expect(page).toHaveURL(/\/products\//);
 
     // Add to cart
-    await page.getByTestId('add-to-cart-btn').click()
-    await expect(page.getByTestId('cart-drawer')).toBeVisible()
-    await expect(page.getByTestId('cart-item')).toHaveCount(1)
+    await page.getByTestId('add-to-cart-btn').click();
+    await expect(page.getByTestId('cart-drawer')).toBeVisible();
+    await expect(page.getByTestId('cart-item')).toHaveCount(1);
 
     // Proceed to checkout
-    await page.getByRole('button', { name: /checkout/i }).click()
-    await expect(page).toHaveURL('/checkout')
-    await expect(page.getByTestId('checkout-form')).toBeVisible()
+    await page.getByRole('button', { name: /checkout/i }).click();
+    await expect(page).toHaveURL('/checkout');
+    await expect(page.getByTestId('checkout-form')).toBeVisible();
 
     // Fill mock checkout (COD)
-    await page.getByLabel('Full Name').fill('Test Customer')
-    await page.getByLabel('Address').fill('123 Test Street, Karachi')
-    await page.getByLabel('Phone').fill('03001234567')
-    await page.getByRole('radio', { name: /cash on delivery/i }).check()
-    await page.getByRole('button', { name: /place order/i }).click()
-    await expect(page.getByRole('heading', { name: /order confirmed/i })).toBeVisible()
-  })
-})
+    await page.getByLabel('Full Name').fill('Test Customer');
+    await page.getByLabel('Address').fill('123 Test Street, Karachi');
+    await page.getByLabel('Phone').fill('03001234567');
+    await page.getByRole('radio', { name: /cash on delivery/i }).check();
+    await page.getByRole('button', { name: /place order/i }).click();
+    await expect(page.getByRole('heading', { name: /order confirmed/i })).toBeVisible();
+  });
+});
 ```
 
 #### Flow 3: Admin → Add Product → Edit → Delete
+
 ```typescript
 test.describe('Admin: Product CRUD', () => {
   test.beforeEach(async ({ page }) => {
     // Log in as admin first
-    await page.goto('/auth/login')
-    await page.getByLabel('Email').fill(process.env.TEST_ADMIN_EMAIL!)
-    await page.getByLabel('Password').fill(process.env.TEST_ADMIN_PASSWORD!)
-    await page.getByRole('button', { name: /log in/i }).click()
-    await page.goto('/admin/products')
-  })
+    await page.goto('/auth/login');
+    await page.getByLabel('Email').fill(process.env.TEST_ADMIN_EMAIL!);
+    await page.getByLabel('Password').fill(process.env.TEST_ADMIN_PASSWORD!);
+    await page.getByRole('button', { name: /log in/i }).click();
+    await page.goto('/admin/products');
+  });
 
   test('admin can add a new product', async ({ page }) => {
-    await page.getByRole('button', { name: /add product/i }).click()
-    await page.getByTestId('admin-product-form').waitFor()
-    await page.getByLabel('Product Name').fill('Walnut Dining Table')
-    await page.getByLabel('Price').fill('45000')
-    await page.getByLabel('Stock').fill('10')
-    await page.getByRole('button', { name: /save/i }).click()
-    await expect(page.getByText('Walnut Dining Table')).toBeVisible()
-  })
+    await page.getByRole('button', { name: /add product/i }).click();
+    await page.getByTestId('admin-product-form').waitFor();
+    await page.getByLabel('Product Name').fill('Walnut Dining Table');
+    await page.getByLabel('Price').fill('45000');
+    await page.getByLabel('Stock').fill('10');
+    await page.getByRole('button', { name: /save/i }).click();
+    await expect(page.getByText('Walnut Dining Table')).toBeVisible();
+  });
 
   test('admin can edit a product', async ({ page }) => {
-    await page.getByTestId('product-row').first().getByRole('button', { name: /edit/i }).click()
-    await page.getByLabel('Price').clear()
-    await page.getByLabel('Price').fill('48000')
-    await page.getByRole('button', { name: /save/i }).click()
-    await expect(page.getByRole('alert')).toContainText(/updated/i)
-  })
+    await page.getByTestId('product-row').first().getByRole('button', { name: /edit/i }).click();
+    await page.getByLabel('Price').clear();
+    await page.getByLabel('Price').fill('48000');
+    await page.getByRole('button', { name: /save/i }).click();
+    await expect(page.getByRole('alert')).toContainText(/updated/i);
+  });
 
   test('admin can delete a product', async ({ page }) => {
-    const initialCount = await page.getByTestId('product-row').count()
-    await page.getByTestId('product-row').first().getByRole('button', { name: /delete/i }).click()
-    await page.getByRole('button', { name: /confirm/i }).click() // confirmation dialog
-    await expect(page.getByTestId('product-row')).toHaveCount(initialCount - 1)
-  })
-})
+    const initialCount = await page.getByTestId('product-row').count();
+    await page
+      .getByTestId('product-row')
+      .first()
+      .getByRole('button', { name: /delete/i })
+      .click();
+    await page.getByRole('button', { name: /confirm/i }).click(); // confirmation dialog
+    await expect(page.getByTestId('product-row')).toHaveCount(initialCount - 1);
+  });
+});
 ```
 
 #### Flow 4: Search → Filter → Sort
+
 ```typescript
 test.describe('Discovery: Search, Filter, Sort', () => {
   test('customer can search for a product by name', async ({ page }) => {
-    await page.goto('/products')
-    await page.getByTestId('search-input').fill('dining table')
-    await page.getByTestId('search-input').press('Enter')
-    await expect(page).toHaveURL(/search=dining\+table/)
-    const cards = page.locator('[data-testid="product-card"]')
-    await expect(cards).not.toHaveCount(0)
-  })
+    await page.goto('/products');
+    await page.getByTestId('search-input').fill('dining table');
+    await page.getByTestId('search-input').press('Enter');
+    await expect(page).toHaveURL(/search=dining\+table/);
+    const cards = page.locator('[data-testid="product-card"]');
+    await expect(cards).not.toHaveCount(0);
+  });
 
   test('customer can filter by category', async ({ page }) => {
-    await page.goto('/products')
-    await page.getByTestId('filter-panel').getByRole('checkbox', { name: /dining/i }).check()
-    await expect(page).toHaveURL(/category=dining/)
-  })
+    await page.goto('/products');
+    await page
+      .getByTestId('filter-panel')
+      .getByRole('checkbox', { name: /dining/i })
+      .check();
+    await expect(page).toHaveURL(/category=dining/);
+  });
 
   test('customer can sort by price ascending', async ({ page }) => {
-    await page.goto('/products')
-    await page.getByRole('combobox', { name: /sort/i }).selectOption('price-asc')
-    const prices = await page.locator('[data-testid="product-price"]').allTextContents()
-    const numeric = prices.map(p => parseInt(p.replace(/\D/g, '')))
-    expect(numeric).toEqual([...numeric].sort((a, b) => a - b))
-  })
-})
+    await page.goto('/products');
+    await page.getByRole('combobox', { name: /sort/i }).selectOption('price-asc');
+    const prices = await page.locator('[data-testid="product-price"]').allTextContents();
+    const numeric = prices.map((p) => parseInt(p.replace(/\D/g, '')));
+    expect(numeric).toEqual([...numeric].sort((a, b) => a - b));
+  });
+});
 ```
 
 ---
@@ -345,6 +364,7 @@ test.describe('Discovery: Search, Filter, Sort', () => {
 Always mock external services in unit and component tests. Never call real APIs in tests.
 
 ### Supabase
+
 ```typescript
 vi.mock('@/lib/supabase', () => ({
   supabase: {
@@ -359,10 +379,11 @@ vi.mock('@/lib/supabase', () => ({
       signOut: vi.fn().mockResolvedValue({ error: null }),
     },
   },
-}))
+}));
 ```
 
 ### Cloudinary
+
 ```typescript
 vi.mock('@/lib/cloudinary', () => ({
   uploadImage: vi.fn().mockResolvedValue({
@@ -370,26 +391,28 @@ vi.mock('@/lib/cloudinary', () => ({
     public_id: 'test-image',
   }),
   deleteImage: vi.fn().mockResolvedValue({ result: 'ok' }),
-}))
+}));
 ```
 
 ### Resend (Email)
+
 ```typescript
 vi.mock('@/lib/resend', () => ({
   sendEmail: vi.fn().mockResolvedValue({ id: 'mock-email-id', error: null }),
-}))
+}));
 ```
 
 ### Claude API (AI Chatbot)
+
 ```typescript
 vi.mock('@/lib/claude', () => ({
   getChatResponse: vi.fn().mockResolvedValue('This is a mock AI response.'),
   streamChatResponse: vi.fn().mockImplementation(async function* () {
-    yield 'This '
-    yield 'is '
-    yield 'streamed.'
+    yield 'This ';
+    yield 'is ';
+    yield 'streamed.';
   }),
-}))
+}));
 ```
 
 ---

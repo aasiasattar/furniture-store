@@ -26,6 +26,7 @@ Examples:
 ## File structure
 
 Each command file should include:
+
 - **Description** — one line shown in the command picker
 - **Usage** — `/command-name [arguments]`
 - **Instructions** — what Claude does when the command is run
