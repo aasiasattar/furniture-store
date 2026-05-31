@@ -92,10 +92,10 @@ Each slide stacks: background image (`fill`, `object-cover`) → dark overlay (`
 ## Navigation
 
 | Trigger                           | Behaviour                                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------ | ----------------- | --------- |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
 | Click next / prev arrow (desktop) | Advance / rewind one slide; wraps at boundaries                                            |
 | Click dot indicator               | Jump directly to that slide; direction inferred from relative index                        |
-| Swipe left / right (mobile)       | Framer Motion `drag="x"` with velocity-aware threshold (`                                  | offset × velocity | > 10000`) |
+| Swipe left / right (mobile)       | Framer Motion `drag="x"` with velocity-aware power threshold (> 10000)                     |
 | `ArrowRight` / `ArrowLeft` key    | Advance / rewind one slide; `e.preventDefault()` blocks page scroll                        |
 | Click pause / play                | Toggles auto-play; updates `aria-pressed`                                                  |
 | Click "Skip carousel" link        | Focus moves to `<div id="after-hero" />` placed immediately after the carousel `<section>` |
