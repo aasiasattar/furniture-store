@@ -7,32 +7,21 @@
 
 ## Overview
 
-The Header and Footer are rendered once per session by the root `RootLayout` and are visible
-on every route — public, account, and admin (admin will compose a different shell, but the
-Header and Footer described here are the **storefront** chrome). They establish brand
-presence, give users a predictable path to navigation and conversion primitives, and host
-trust signals required to make a portfolio ecommerce site believable.
-
-Both components must work on the slowest device the spec targets (320 px Android, 3G
-network) and pass WCAG 2.1 AA. Both must use the design system in CLAUDE.md §3 strictly —
-no ad-hoc colours, no Google Fonts CDN links, no `<img>` for the logo.
+Rendered once by `RootLayout` and visible on every public/account route (admin uses a
+separate shell). They establish brand presence, surface navigation + conversion primitives
+(cart, search), and host trust signals. Must work on 320 px / 3G, pass WCAG 2.1 AA, and
+follow the CLAUDE.md §3 design system strictly — no ad-hoc colours, no Google Fonts CDN,
+no `<img>` for the logo.
 
 ## User Stories
 
-- **As a shopper on any device**, I want to see the brand name, navigate to product
-  categories, and access my cart from any page so I never feel lost.
-- **As a shopper on mobile**, I want a single-tap menu that doesn't cover the whole screen
-  and is easy to dismiss.
-- **As a shopper looking for a specific item**, I want a search affordance that's always
-  visible without dominating the layout.
-- **As a returning customer**, I want my session to persist across navigation and to see my
-  cart count update immediately when I add an item.
-- **As a brand-new visitor**, I want to subscribe to the newsletter from any page without
-  creating an account.
-- **As a shopper considering checkout**, I want to see trust signals (payment options, SSL,
-  money-back guarantee) in the footer before I commit.
-- **As a keyboard-only or screen-reader user**, I want every interactive element reachable
-  with Tab, with visible focus rings and accurate ARIA labelling.
+- **Shopper, any device** — see brand, navigate categories, and reach the cart from every page.
+- **Shopper, mobile** — single-tap menu that doesn't cover the whole screen and is easy to dismiss.
+- **Shopper searching** — search affordance always visible without dominating the layout.
+- **Returning customer** — session persists across navigation; cart count updates immediately on add.
+- **New visitor** — subscribe to the newsletter from any page without creating an account.
+- **Shopper near checkout** — trust signals (SSL, payment options, returns) visible in the footer.
+- **Keyboard / screen-reader user** — every interactive element reachable with Tab; visible focus rings; accurate ARIA labelling.
 
 ---
 
@@ -92,94 +81,52 @@ Lives at `src/components/layout/Header/` and is composed into `app/layout.tsx`.
 
 ```
 src/components/layout/Header/
-  Header.tsx                  // Server Component — composition shell
-  HeaderClient.tsx            // 'use client' — wires session + cart count from stores
-  Logo.tsx                    // Server — inline SVG, no network fetch
-  MainNav.tsx                 // 'use client' — uses usePathname() for active link
-  HeaderActions.tsx           // 'use client' — search / wishlist / cart / account triggers
-  AccountMenu.tsx             // 'use client' — dropdown when authenticated
-  MobileMenuButton.tsx        // 'use client' — toggles mobile drawer
-  MobileDrawer.tsx            // 'use client' — Framer Motion slide-in panel (lazy)
-  Header.test.tsx             // RTL component tests
+  Header.tsx           // Server — composition shell
+  HeaderClient.tsx     // Client — owns scroll + menu state, wires session + cart store
+  Logo.tsx             // Server — inline SVG, no network fetch
+  MainNav.tsx          // Client — usePathname() for active link
+  HeaderActions.tsx    // Client — search/wishlist/cart/account/hamburger triggers
+                       //          (absorbs MobileMenuButton + AccountMenu dropdown)
+  MobileDrawer.tsx     // Client — lazy-loaded Framer Motion slide-in panel
+  Header.test.tsx      // RTL component tests
 ```
 
 Every file MUST stay under 300 lines per CLAUDE.md §4.
 
 ## A4. Sticky / Scroll Behaviour
 
-- Position: `fixed top-0 left-0 right-0 z-50`.
-- Page body needs top padding equal to header height to avoid jump.
-- At scroll Y = 0 → fully opaque cream.
-- At scroll Y > 64 → adds `border-b border-beige` and shrinks height to 64 px (desktop only).
+- `fixed top-0 left-0 right-0 z-50`; body has top padding equal to header height to avoid jump.
+- Y = 0 → fully opaque cream. Y > 64 → adds `border-b border-beige` and shrinks to 64 px (desktop only).
 - Transition: 200 ms `ease-out` on `height`, `box-shadow`, `background-color`.
-- **Hide-on-scroll behaviour**: NOT implemented in v1 (always visible) — matches aliffnoon
-  reference and avoids the jank common with hide-on-scroll on iOS Safari.
-- Implementation: a single `useScroll()` from Framer Motion in `HeaderClient.tsx` driving a
-  `motion.header` style — no per-frame React re-render.
+- **No hide-on-scroll** in v1 — matches aliffnoon and avoids iOS Safari jank.
+- Driven by a single `useScroll()` (Framer Motion) in `HeaderClient.tsx` — no per-frame React re-render.
 
 ## A5. Interactions
 
-| Trigger                         | Behaviour                                                                                           |
-| ------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Hover over nav link (desktop)   | Colour shifts to maroon over 200 ms; gold underline grows from centre-out                           |
-| Click nav link                  | Standard Next `<Link>` — soft navigation                                                            |
-| Active route                    | Permanent gold underline + maroon text colour                                                       |
-| Hover icon button               | Colour shifts to maroon, scale 1.05 over 150 ms                                                     |
-| Click search icon               | Triggers `useSearchModal().open()` — modal contents are out of scope (see [Search spec — TBD])      |
-| Click cart icon                 | Triggers `useCartDrawer().open()` — drawer contents are out of scope (see [Cart drawer spec — TBD]) |
-| Click wishlist icon             | `<Link href="/wishlist">`                                                                           |
-| Click account icon (logged out) | `<Link href="/login">`                                                                              |
-| Click account icon (logged in)  | Toggles `<AccountMenu>` dropdown                                                                    |
-| Click hamburger (mobile)        | Opens `<MobileDrawer>` — slides in from right, 320 ms ease-out, backdrop fades in                   |
-| Inside mobile drawer            | Tap link soft-navigates and closes drawer; tap backdrop closes drawer; press Escape closes drawer   |
+| Trigger                       | Behaviour                                                                                       |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| Hover nav link (desktop)      | Text → maroon over 200 ms; gold underline grows from centre-out                                 |
+| Active route                  | Permanent gold underline + maroon text                                                          |
+| Hover icon button             | Text → maroon, scale 1.05 over 150 ms                                                           |
+| Click search / cart icon      | Opens `useSearchModal()` / `useCartDrawer()` — modal+drawer contents out of scope (own specs)   |
+| Click wishlist                | `<Link href="/wishlist">`                                                                       |
+| Click account (out / in)      | Link to `/login` if logged out; toggle account dropdown if logged in                            |
+| Click hamburger (mobile)      | Opens `<MobileDrawer>` — slide-in right, 320 ms ease-out, backdrop fades in                     |
+| Inside mobile drawer          | Tap link soft-navigates + closes; tap backdrop closes; Escape closes                            |
 
 ### Account dropdown menu
 
-```
-┌──────────────────┐
-│ My Account       │
-│ Orders           │
-│ Wishlist         │
-│ ──────────────── │
-│ Sign out         │
-└──────────────────┘
-```
-
-Closes on: outside click, Escape, route change, blur of last focusable item.
+Items (in order): **My Account · Orders · Wishlist · — · Sign out**.
+Closes on: outside click, Escape, route change, or blur of the last focusable item.
 
 ## A6. State Management
 
-Three concerns, three sources:
-
-1. **Cart count** — Zustand store `useCartStore` at `src/stores/cart.ts`.
-
-   ```ts
-   type CartStore = {
-     items: CartItem[];
-     count: number; // derived selector — sum of qty
-     add: (item: CartItem) => void;
-     remove: (productId: string) => void;
-     setQuantity: (productId: string, qty: number) => void;
-     clear: () => void;
-   };
-   ```
-
-   Persisted to `localStorage` via `zustand/middleware/persist`.
-   Subscribed in `HeaderActions.tsx` via a memoised `count` selector.
-
-2. **Auth session** — `useSession()` from `next-auth/react`. Header reads `data?.user`. Uses
-   `status === 'loading'` to show a skeleton avatar (no flash of "logged out" UI).
-
-3. **Local UI state** — plain `useState` in `HeaderClient.tsx`:
-
-   ```ts
-   const [mobileOpen, setMobileOpen] = useState(false);
-   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-   ```
-
-   Lifted into `HeaderClient` so the Server `Header` shell stays static.
-
-4. **Active route** — `usePathname()` in `MainNav.tsx`. No state — derived per render.
+| Concern      | Source                                                                                                    |
+| ------------ | --------------------------------------------------------------------------------------------------------- |
+| Cart count   | `useCartStore` (`src/stores/cart.ts`), persisted to `localStorage` via `zustand/persist`. Memoised `count` selector subscribed in `HeaderActions`. |
+| Auth session | `useSession()` from `next-auth/react`. `status === 'loading'` renders a skeleton avatar (no FOUC).        |
+| Local UI     | Mobile-drawer and account-menu open/close state lives in `HeaderClient.tsx` (plain `useState`).           |
+| Active route | `usePathname()` in `MainNav.tsx` — derived per render, no state.                                          |
 
 ## A7. Accessibility
 
@@ -201,11 +148,9 @@ Three concerns, three sources:
 
 ## B1. Overview
 
-A four-column maroon footer on desktop that becomes two columns on tablet and a stacked
-accordion on mobile. Anchors the page bottom via `mt-auto` on the body's flex column.
-Contains brand reassurance, secondary navigation, newsletter capture, and trust elements.
-
-Lives at `src/components/layout/Footer/`.
+A four-column maroon footer on desktop → 2 × 2 on tablet → stacked accordion on mobile.
+Anchored to page bottom via `mt-auto` on the body's flex column. Houses brand reassurance,
+secondary nav, newsletter capture, and trust elements. Lives at `src/components/layout/Footer/`.
 
 ## B2. Visual Design
 
@@ -261,88 +206,24 @@ Verified contrasts: cream on maroon = 9.2:1 ✓ · gold on maroon = 4.7:1 ✓
 
 ```
 src/components/layout/Footer/
-  Footer.tsx                  // Server — composition + DB fetch for categories
-  FooterBrand.tsx             // Server
-  FooterShop.tsx              // Server — receives categories prop
-  FooterHelp.tsx              // Server — static links
-  FooterConnect.tsx           // Server — composes Newsletter + Social + WhatsApp
-  NewsletterForm.tsx          // 'use client' — Server Action invocation, optimistic UI
-  SocialIcons.tsx             // Server — reads NEXT_PUBLIC_* env at module scope
-  PaymentIcons.tsx            // Server
-  TrustBadges.tsx             // Server
-  FooterAccordion.tsx         // 'use client' — wraps columns on mobile
-  BottomStrip.tsx             // Server
-  BackToTopButton.tsx         // 'use client' — scroll listener + smooth scroll
-  Footer.test.tsx             // RTL
+  Footer.tsx           // Server — composition, category DB fetch, brand block,
+                       //          payment icons, trust badges, bottom strip
+  FooterColumn.tsx     // Server/Client — one component handles Brand/Shop/Help/Connect
+                       //                 and the mobile accordion behaviour
+  NewsletterForm.tsx   // Client — Server Action invocation, useActionState
+  SocialIcons.tsx      // Server — reads env at module scope; includes WhatsApp pill
+  BackToTopButton.tsx  // Client — throttled scroll listener
+  Footer.test.tsx      // RTL
 ```
 
 ## B4. Newsletter form
 
-### Markup
+Submits to Server Action `subscribeNewsletter`. Full implementation in `14-newsletter.md`
+(TBD). Contract this spec owns:
 
-```tsx
-<form action={subscribeNewsletter}>
-  <label htmlFor="newsletter-email" className="sr-only">
-    Email address
-  </label>
-  <input
-    id="newsletter-email"
-    name="email"
-    type="email"
-    required
-    placeholder="you@example.com"
-    aria-describedby="newsletter-status"
-  />
-  <button type="submit">Subscribe</button>
-  <p id="newsletter-status" aria-live="polite" />
-</form>
-```
-
-### Server Action
-
-```ts
-// src/app/(actions)/newsletter.ts
-'use server';
-
-import { z } from 'zod';
-import { ratelimit } from '@/lib/ratelimit';
-import { prisma } from '@/lib/prisma';
-import { resend } from '@/lib/resend';
-
-const SubscribeSchema = z.object({ email: z.string().email().max(320) });
-
-export async function subscribeNewsletter(_: FormState, fd: FormData): Promise<FormState> {
-  const ip = (await headers()).get('x-forwarded-for') ?? 'unknown';
-  const { success } = await ratelimit.newsletter.limit(ip);
-  if (!success) return { ok: false, message: 'Too many attempts. Try again in a minute.' };
-
-  const parsed = SubscribeSchema.safeParse({ email: fd.get('email') });
-  if (!parsed.success) return { ok: false, message: 'Please enter a valid email.' };
-
-  const existing = await prisma.newsletterSubscriber.findUnique({
-    where: { email: parsed.data.email },
-  });
-  if (existing?.status === 'active') {
-    return { ok: true, message: "You're already subscribed — thanks!" };
-  }
-
-  await prisma.newsletterSubscriber.upsert({
-    where: { email: parsed.data.email },
-    update: { status: 'active', resubscribedAt: new Date() },
-    create: { email: parsed.data.email, status: 'active', source: 'footer' },
-  });
-
-  await resend.contacts.create({
-    email: parsed.data.email,
-    audienceId: process.env.RESEND_AUDIENCE_ID!,
-    unsubscribed: false,
-  });
-
-  return { ok: true, message: 'Subscribed! Welcome to the family.' };
-}
-```
-
-Client component uses `useActionState` (Next 16 / React 19) for transitional state.
+- Single `<input type="email" required>` with visually-hidden `<label>` and `aria-describedby` pointing at a status `<p aria-live="polite">`.
+- Submit handled via `useActionState` (Next 16 / React 19); button renders spinner + `aria-busy="true"` during the transition.
+- Validation, rate-limiting, persistence: Server Action's responsibility, not this spec's.
 
 ### Form states
 
@@ -355,138 +236,36 @@ Client component uses `useActionState` (Next 16 / React 19) for transitional sta
 | Validation error   | Red inline error under input, focus moves to input                       |
 | Rate-limited       | Same as validation error with rate-limit message                         |
 
-### Data model — Prisma
-
-```prisma
-model NewsletterSubscriber {
-  id              String   @id @default(cuid())
-  email           String   @unique
-  status          NewsletterStatus @default(active) // active | unsubscribed | bounced
-  source          String   // 'footer' | 'checkout' | 'admin'
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  resubscribedAt  DateTime?
-  unsubscribedAt  DateTime?
-
-  @@index([status])
-}
-
-enum NewsletterStatus { active unsubscribed bounced }
-```
-
 ## B5. Social / Payment / Trust elements
 
-### Social icons (`SocialIcons.tsx`)
-
-| Platform  | Icon source                                                          | URL env var                 |
-| --------- | -------------------------------------------------------------------- | --------------------------- |
-| Instagram | `lucide-react` `Instagram`                                           | `NEXT_PUBLIC_INSTAGRAM_URL` |
-| Facebook  | `lucide-react` `Facebook`                                            | `NEXT_PUBLIC_FACEBOOK_URL`  |
-| TikTok    | Inline SVG at `public/icons/tiktok.svg` (lucide doesn't ship TikTok) | `NEXT_PUBLIC_TIKTOK_URL`    |
-
-URLs validated by the env Zod schema in `src/lib/env.ts`. Missing URL → that icon is omitted
-(no broken link rendered).
-
-Each icon is an `<a target="_blank" rel="noopener noreferrer" aria-label="Follow on Instagram">`.
-
-### WhatsApp button
-
-- Uses `lucide-react` `MessageCircle` inside a pill button.
-- `href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_PHONE}?text=Hi%20%E2%80%94%20I%20have%20a%20question"`
-- Always rendered (NOT the floating WhatsApp button — that's a separate component).
-
-### Payment icons (`PaymentIcons.tsx`)
-
-- Static SVGs in `public/icons/payment/`:
-  - `cod.svg` — COD badge
-  - `bank-transfer.svg` — bank transfer badge
-- Imported as `<Image src="/icons/payment/cod.svg" alt="Cash on Delivery" width={48} height={32} />`.
-- Aligned in a row, `gap-3`, beneath trust badges on desktop and in the accordion on mobile.
-
-### Trust badges (`TrustBadges.tsx`)
-
-- 🛡️ "SSL Secure" — `lucide-react` `ShieldCheck`
-- 🔄 "30-Day Returns" — `lucide-react` `RefreshCcw`
-- 🔒 "Privacy First" — `lucide-react` `Lock`
-
-Each badge is icon + caption. No external service or link — purely informational.
+| Element       | Source                                                                    | Notes                                                                                  |
+| ------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Instagram     | `lucide-react` `Instagram`                                                | Rendered only if its env URL is set. Each social link opens in a new tab, `rel="noopener noreferrer"`, with an `aria-label`. |
+| Facebook      | `lucide-react` `Facebook`                                                 | Same rule as above.                                                                    |
+| TikTok        | Inline SVG at `public/icons/tiktok.svg` (lucide ships no TikTok glyph)    | Same rule as above.                                                                    |
+| WhatsApp pill | `lucide-react` `MessageCircle` inside a pill button linking to `wa.me`    | Always rendered (separate from the floating WhatsApp button — that's its own spec).    |
+| Payment icons | Static SVGs in `public/icons/payment/` (`cod.svg`, `bank-transfer.svg`)   | Rendered via `next/image` with explicit `width`/`height`.                              |
+| Trust badges  | `lucide-react` `ShieldCheck` / `RefreshCcw` / `Lock` + caption            | Pure informational — no link.                                                          |
 
 ## B6. Back-to-top button
 
-- File: `src/components/layout/Footer/BackToTopButton.tsx`.
-- Position: `fixed bottom-6 right-6 z-40`.
-- Visibility: hidden by default; appears at `scrollY > 600` with `opacity` transition over
-  200 ms.
-- Click: `window.scrollTo({ top: 0, behavior: 'smooth' })`. Respects
-  `prefers-reduced-motion` — falls back to `behavior: 'auto'`.
-- ARIA: `<button aria-label="Back to top">` with `lucide-react` `ArrowUp` icon.
-- Implementation: `useEffect` adds a passive `scroll` listener, throttled at 100 ms per
-  CLAUDE.md §9. Listener removed on unmount.
+- `fixed bottom-6 right-6 z-40`; hidden by default, fades in at `scrollY > 600` (200 ms).
+- Click → `window.scrollTo({ top: 0, behavior: 'smooth' })`; reduced motion → `behavior: 'auto'`.
+- `<button aria-label="Back to top">` with `lucide-react` `ArrowUp`.
+- Passive `scroll` listener throttled at 100 ms per CLAUDE.md §9; removed on unmount.
 
 ## B7. Mobile accordion
 
-- `<FooterAccordion>` wraps each non-Brand column on mobile (`md:hidden`).
-- Each column header is `<button aria-expanded={open} aria-controls={panelId}>` with a chevron
-  that rotates 180 ° on open.
-- Body height animated via Framer Motion `<AnimatePresence>` and `initial/animate/exit` on
-  `height: 0 ↔ 'auto'`.
-- All accordions independent (multiple can be open at once) — matches user expectation for
-  footer columns.
-- `prefers-reduced-motion`: no height animation, just toggle visibility instantly.
+- `<FooterColumn>` is a collapsible accordion on mobile, a static block on tablet/desktop.
+- Header is `<button aria-expanded aria-controls={panelId}>` with a chevron rotating 180 ° on open.
+- Body height animated via Framer Motion `<AnimatePresence>` on `height: 0 ↔ 'auto'`.
+- Columns are independent (multiple can be open at once).
+- `prefers-reduced-motion`: no height animation — toggle visibility instantly.
 
 ## B8. Data Requirements
 
-### Categories
-
-```ts
-// src/components/layout/Footer/Footer.tsx
-import { unstable_cache } from 'next/cache';
-import { prisma } from '@/lib/prisma';
-
-const getFooterCategories = unstable_cache(
-  async () =>
-    prisma.category.findMany({
-      where: { isPublished: true },
-      orderBy: { sortOrder: 'asc' },
-      take: 6,
-      select: { slug: true, name: true },
-    }),
-  ['footer-categories'],
-  { tags: ['categories'], revalidate: 86400 },
-);
-```
-
-Revalidation strategy:
-
-- 24 h fallback (`revalidate: 86400`).
-- On-demand via `revalidateTag('categories')` from the admin category create / edit / delete
-  Server Actions. See admin spec — TBD.
-
-If the DB query throws (e.g. cold start, connection pool exhausted), `Footer.tsx` falls back
-to hardcoded category names from `src/lib/constants/categories.ts` rather than crashing
-the entire layout.
-
-### Social URLs (env vars)
-
-```ts
-// src/lib/env.ts (extension)
-NEXT_PUBLIC_INSTAGRAM_URL: z.string().url().optional(),
-NEXT_PUBLIC_FACEBOOK_URL:  z.string().url().optional(),
-NEXT_PUBLIC_TIKTOK_URL:    z.string().url().optional(),
-NEXT_PUBLIC_WHATSAPP_PHONE: z.string().regex(/^\d{10,15}$/).optional(),
-```
-
-Zod validation runs at app startup per CLAUDE.md §15. Missing values do not crash the app —
-the corresponding icon is omitted.
-
-### Resend integration env vars
-
-```ts
-RESEND_API_KEY:      z.string().startsWith('re_'),
-RESEND_AUDIENCE_ID:  z.string().uuid(),
-```
-
-These are server-only (no `NEXT_PUBLIC_` prefix).
+- **Categories** — fetched server-side via Prisma, cached with `unstable_cache` (tag `categories`, 24 h revalidate). Admin category mutations call `revalidateTag('categories')`. DB failure → fall back to `FALLBACK_CATEGORIES` in `src/lib/constants/categories.ts`.
+- **Env vars** — social URLs, WhatsApp phone, and Resend credentials are validated by the env schema in `src/lib/env.ts`. A missing optional social URL omits its icon (no broken link).
 
 ## B9. Accessibility
 
@@ -508,110 +287,56 @@ These are server-only (no `NEXT_PUBLIC_` prefix).
 
 ## S1. Performance
 
-| Concern              | Decision                                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Logo                 | Inline React SVG component — zero network fetch, no LCP cost, can be styled via CSS                                      |
-| Other icons          | `lucide-react` named imports only (`import { Search } from 'lucide-react'`) — tree-shaken                                |
-| Mobile drawer        | Lazy-loaded via `dynamic(() => import('./MobileDrawer'), { ssr: false })`; only loaded after the user taps the hamburger |
-| Footer               | Server-rendered; no lazy load needed (small DOM, no images above the fold-in-view)                                       |
-| Payment icon SVGs    | Loaded via `next/image` with explicit `width`/`height`, served from `public/`                                            |
-| Scroll listener      | Throttled at 100 ms (back-to-top + sticky header) per CLAUDE.md §9                                                       |
-| Cart store hydration | Persisted via `zustand/persist`; reads localStorage in a `useEffect` to avoid hydration mismatch                         |
-| Bundle               | Header + Footer combined target: < 30 KB gzip JS contribution to the layout chunk                                        |
+| Concern              | Decision                                                                                              |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| Logo                 | Inline React SVG — zero network fetch, no LCP cost, CSS-styleable                                     |
+| Other icons          | `lucide-react` named imports only — tree-shaken                                                       |
+| Mobile drawer        | `dynamic(() => import('./MobileDrawer'), { ssr: false })`; loaded only after hamburger tap            |
+| Footer               | Server-rendered; no lazy load                                                                         |
+| Payment icon SVGs    | `next/image` with explicit `width`/`height`, served from `public/`                                    |
+| Scroll listener      | Throttled at 100 ms per CLAUDE.md §9                                                                  |
+| Cart store hydration | `zustand/persist`; reads localStorage in `useEffect` to avoid hydration mismatch                      |
+| Bundle               | Header + Footer combined target: < 30 KB gzip contribution to the layout chunk                        |
 
 ## S2. Tech-stack split — Server vs. Client
 
-| File                                        | Boundary   | Reason                                             |
-| ------------------------------------------- | ---------- | -------------------------------------------------- |
-| `Header.tsx`                                | **Server** | Composition shell; no interactivity at this level  |
-| `HeaderClient.tsx`                          | **Client** | Wraps interactive children, owns scroll/menu state |
-| `Logo.tsx`                                  | **Server** | Pure SVG                                           |
-| `MainNav.tsx`                               | **Client** | `usePathname()` for active state                   |
-| `HeaderActions.tsx`                         | **Client** | Hooks into Zustand cart store, NextAuth            |
-| `AccountMenu.tsx`                           | **Client** | Local open state, click-outside hook               |
-| `MobileMenuButton.tsx`                      | **Client** | Toggles parent state                               |
-| `MobileDrawer.tsx`                          | **Client** | Animation + focus trap                             |
-| `Footer.tsx`                                | **Server** | Static + Prisma DB read                            |
-| `FooterBrand` / `FooterHelp` / `FooterShop` | **Server** | Static or prop-fed                                 |
-| `NewsletterForm.tsx`                        | **Client** | `useActionState` for transitions                   |
-| `SocialIcons.tsx`                           | **Server** | Reads env vars at module scope                     |
-| `FooterAccordion.tsx`                       | **Client** | UI state only                                      |
-| `BackToTopButton.tsx`                       | **Client** | Scroll listener                                    |
-| `BottomStrip.tsx`                           | **Server** | Static                                             |
+| File                  | Boundary          | Reason                                                |
+| --------------------- | ----------------- | ----------------------------------------------------- |
+| `Header.tsx`          | **Server**        | Composition shell; no interactivity at this level     |
+| `HeaderClient.tsx`    | **Client**        | Wraps interactive children, owns scroll/menu state    |
+| `Logo.tsx`            | **Server**        | Pure SVG                                              |
+| `MainNav.tsx`         | **Client**        | `usePathname()` for active state                      |
+| `HeaderActions.tsx`   | **Client**        | Zustand cart, NextAuth session, account dropdown, hamburger toggle |
+| `MobileDrawer.tsx`    | **Client**        | Animation + focus trap                                |
+| `Footer.tsx`          | **Server**        | Static + Prisma DB read                               |
+| `FooterColumn.tsx`    | **Client**        | Accordion open/close state on mobile                  |
+| `NewsletterForm.tsx`  | **Client**        | `useActionState` for transitions                      |
+| `SocialIcons.tsx`     | **Server**        | Reads env vars at module scope                        |
+| `BackToTopButton.tsx` | **Client**        | Scroll listener                                       |
 
 ## S3. Design tokens
 
-Add to `src/app/globals.css`:
-
-```css
-@theme {
-  --color-brand-black: #1a1a1a;
-  --color-brand-maroon: #6b1f2e;
-  --color-brand-gold: #c9a961;
-  --color-brand-beige: #e8dcc4;
-  --color-brand-cream: #faf7f2;
-
-  --font-display: 'Playfair Display', ui-serif, Georgia, serif;
-  --font-body: 'Inter', ui-sans-serif, system-ui;
-}
-```
-
-Replace the placeholder `Geist` fonts in `app/layout.tsx` with `next/font/google` for
-Playfair + Inter when this spec is implemented.
-
-`tailwind.config` consumed via `@theme` (Tailwind v4 native).
+Add a `@theme` block to `src/app/globals.css` exposing `--color-brand-{black,maroon,gold,beige,cream}` (hex values per §3) and `--font-display: 'Playfair Display', ui-serif, Georgia, serif` / `--font-body: 'Inter', ui-sans-serif, system-ui`. Tailwind v4 consumes `@theme` natively — no `tailwind.config` entry needed. Replace the placeholder `Geist` fonts in `app/layout.tsx` with `next/font/google` for Playfair + Inter when this spec is implemented.
 
 ## S4. Test cases
 
 ### Vitest unit
 
-- `subscribeNewsletter` — happy path (new email), duplicate active, duplicate unsubscribed
-  (resubscribe), invalid email, rate-limit hit, Resend failure rolls back DB upsert.
-- `useCartStore` — `add` increments count, `remove` decrements, `setQuantity` to 0 deletes,
-  `clear` empties.
-- Env validation — missing required `RESEND_API_KEY` throws at startup.
+- `useCartStore` — `add` increments count, `remove` decrements, `setQuantity` to 0 deletes, `clear` empties.
+- `subscribeNewsletter` — happy path (new email), duplicate active, invalid email. (Full coverage in newsletter spec.)
 
 ### React Testing Library (component)
 
-- **Header**
-  - Renders all 5 nav items at desktop width.
-  - Cart badge shows mocked count `3`; live region announces.
-  - Active route highlight matches mocked `usePathname`.
-  - Hamburger hidden at desktop, visible at mobile.
-  - Mobile drawer opens on hamburger click; closes on Escape; closes on backdrop click.
-  - Account icon links to `/login` when no session; opens menu when session present.
-- **Footer**
-  - All four columns render at desktop width; only the heading buttons render initially
-    (collapsed) at mobile width.
-  - Newsletter form rejects empty submission; rejects invalid format; shows success on valid
-    submission with mocked Server Action.
-  - Newsletter "already subscribed" path renders correct message.
-  - Social icons omitted when corresponding env var is missing.
-  - Categories rendered from passed prop; falls back to hardcoded list when prop is empty.
-  - Back-to-top button hidden at scroll Y = 0; visible at Y > 600 (use a controllable
-    `IntersectionObserver` mock or scroll the test window).
+- **Header** — desktop renders all 5 nav items; cart badge reflects mocked count + live region announces; active route highlight matches mocked `usePathname`; mobile drawer opens on hamburger click and closes on Escape.
+- **Footer** — 4-column desktop vs collapsed accordion mobile; newsletter happy path with mocked Server Action; social icon omitted when corresponding env var is missing; categories fall back to hardcoded list when prop is empty.
 
 ### Playwright E2E
 
-1. **Sticky header** — load home, scroll 200 px, assert header has scrolled-state class
-   (`data-scrolled="true"` or computed style).
-2. **Cart counter** — add product to cart from PDP, return to home, header badge shows `1`.
-3. **Mobile drawer** — set viewport to 375 px, tap hamburger, drawer visible, tap link,
-   navigated + drawer closed.
+1. **Sticky header** — load home, scroll 200 px, assert header has scrolled-state class.
+2. **Cart counter** — add product from PDP, return to home, badge shows `1`.
+3. **Mobile drawer** — viewport 375 px, tap hamburger, drawer visible, tap link, navigated + drawer closed.
 4. **Newsletter happy path** — fill footer email, submit, success message visible within 2 s.
-5. **Newsletter duplicate** — submit same email twice, second submission shows "already
-   subscribed" message.
-6. **Back-to-top** — scroll to bottom, button visible, click, page scrolled to Y = 0.
-7. **Keyboard tour** — Tab from skip-link → header nav → content → footer links → newsletter
-   input → submit → social. No traps; focus rings visible at every step.
-8. **Reduced motion** — emulate `prefers-reduced-motion: reduce`; verify no Framer Motion
-   transitions fire (no `transform` style on header at scroll, drawer pops in instantly).
-
-### Manual / accessibility audit
-
-- axe-core (Playwright `@axe-core/playwright`) on home page — zero violations.
-- Lighthouse accessibility score ≥ 95 on `/` (CLAUDE.md §9).
-- VoiceOver smoke test: tab through header, hear correct labels and counts.
+5. **Keyboard tour** — Tab from skip-link → header nav → content → footer links → newsletter input → submit → social. No traps; focus rings visible at every step.
 
 ## S5. Edge cases
 
@@ -672,7 +397,8 @@ Playfair + Inter when this spec is implemented.
 - Search modal contents and search algorithm — see [Search spec — TBD].
 - Cart drawer contents (line items, totals, checkout button) — see [Cart drawer spec — TBD].
 - Account dropdown menu items beyond the four listed (e.g. order history page) — see [Auth spec — TBD].
-- Newsletter email templates / double-opt-in flow — see [Newsletter spec — TBD].
+- Newsletter Server Action implementation, email templates, double-opt-in flow — see [Newsletter spec — TBD].
+- `NewsletterSubscriber` Prisma model — see [Database schema spec — TBD].
 - Admin dashboard layout chrome — admin uses a different shell.
 - Floating WhatsApp button (separate component, separate spec).
 - AI chatbot launcher — separate spec.
@@ -680,18 +406,9 @@ Playfair + Inter when this spec is implemented.
 
 ## S8. Implementation notes
 
-- Mobile-first — write Tailwind classes for the smallest breakpoint first, then layer up
-  with `sm:`, `md:`, `lg:`, `xl:` modifiers.
-- All colour, font, and spacing tokens consumed via Tailwind classes referencing the
-  `@theme` block in `globals.css` — no inline `style={{ color: '#...' }}`.
-- Every interactive element MUST have a visible focus state. Default Tailwind
-  `focus-visible:ring-2 ring-brand-gold ring-offset-2 ring-offset-brand-cream` works for the
-  Header; on the maroon Footer use `focus-visible:ring-brand-cream`.
-- Both components must be tested in isolation — `Header.test.tsx` and `Footer.test.tsx` MUST
-  NOT depend on any sibling component beyond the children they own.
-- Reference `node_modules/next/dist/docs/` before using App Router APIs (`unstable_cache`,
-  Server Actions, `useActionState`) — Next.js 16 conventions may differ from training data
-  per CLAUDE.md preamble.
-- Co-locate tests next to components per CLAUDE.md §12.
-- Add `data-testid` attributes only on elements targeted by Playwright tests; prefer
-  role/text queries elsewhere.
+- Mobile-first — smallest breakpoint first, then `sm:`/`md:`/`lg:`/`xl:` modifiers.
+- All tokens consumed via Tailwind classes referencing `@theme` in `globals.css` — no inline `style={{ color: '#...' }}`.
+- Visible focus state on every interactive element: `focus-visible:ring-2 ring-brand-gold ring-offset-2 ring-offset-brand-cream` on the Header; `focus-visible:ring-brand-cream` on the maroon Footer.
+- `Header.test.tsx` and `Footer.test.tsx` must NOT depend on sibling components beyond their own children. Co-locate tests per CLAUDE.md §12.
+- Reference `node_modules/next/dist/docs/` before using App Router APIs (`unstable_cache`, Server Actions, `useActionState`) — Next.js 16 may differ from training data.
+- `data-testid` only on elements targeted by Playwright; prefer role/text queries elsewhere.
