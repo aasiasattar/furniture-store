@@ -1,0 +1,187 @@
+// Furniture Store schema. Prisma 7 — see prisma.config.ts for datasource URL loading.
+// Data model derived from docs/specs/03-product-system.md §S1 and
+// docs/specs/04-admin-dashboard.md. Conventions: CLAUDE.md §16 (soft deletes, audit
+// fields, indexes), §8 (bcrypt passwordHash), §4 (types).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url is supplied by prisma.config.ts (DIRECT_URL); runtime uses the pg adapter.
+}
+
+enum Role {
+  customer
+  admin
+}
+
+enum OrderStatus {
+  pending
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+enum AuthResult {
+  success
+  failure
+}
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  name         String?
+  passwordHash String? // bcrypt (CLAUDE.md §8); nullable to allow future OAuth users
+  role         Role    @default(customer)
+  phone        String?
+
+  orders     Order[]
+  authAudits AuthAudit[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?
+  updatedBy String?
+  deletedAt DateTime?
+
+  @@index([role])
+  @@index([deletedAt])
+}
+
+// Append-only login audit (spec 04 §A3). Immutable → no soft-delete / updatedBy.
+model AuthAudit {
+  id        String     @id @default(cuid())
+  userId    String?
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ip        String?
+  userAgent String?
+  result    AuthResult
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([result])
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  image       String?
+  description String?
+  sortOrder   Int     @default(0)
+  isPublished Boolean @default(false)
+
+  products Product[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?
+  updatedBy String?
+  deletedAt DateTime?
+
+  @@index([isPublished])
+  @@index([deletedAt])
+  @@index([sortOrder])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?  @db.Text
+  price       Int // PKR
+  salePrice   Int? // PKR; isOnSale is DERIVED (salePrice != null && salePrice < price)
+  stock       Int      @default(0)
+  images      String[] // Cloudinary URLs; images[0] = primary
+  material    String
+  width       Float // cm
+  height      Float // cm
+  depth       Float // cm
+  weight      Float? // kg (optional per spec 04 §C3)
+  rating      Float    @default(0) // denormalized until Review model (future spec)
+  reviewCount Int      @default(0)
+  isNew       Boolean  @default(false)
+  isPublished Boolean  @default(false)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  orderItems OrderItem[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?
+  updatedBy String?
+  deletedAt DateTime?
+
+  @@index([categoryId])
+  @@index([price])
+  @@index([stock])
+  @@index([createdAt])
+  @@index([isPublished, deletedAt]) // storefront listing filter
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber Int         @unique @default(autoincrement()) // human-friendly "#1042"
+  status      OrderStatus @default(pending)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  // Snapshot of customer + shipping at order time (spec 04 §D3)
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  shippingAddress String?
+  shippingCity    String
+  shippingCountry String  @default("Pakistan")
+
+  // Totals in PKR (spec 04 §D3)
+  subtotal      Int
+  shipping      Int     @default(0)
+  discount      Int     @default(0)
+  total         Int
+  promoCode     String?
+  internalNotes String? @db.Text
+
+  items OrderItem[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?
+  updatedBy String?
+  deletedAt DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+// Immutable line snapshot → minimal audit (createdAt only).
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  name      String // snapshot
+  variant   String? // snapshot (e.g. "Walnut")
+  image     String? // snapshot images[0]
+  unitPrice Int // PKR at order time
+  quantity  Int
+  lineTotal Int // unitPrice * quantity
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
